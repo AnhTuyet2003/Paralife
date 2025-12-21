@@ -1,0 +1,71 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!78 &1
+TagManager:
+  serializedVersion: 2
+  tags:
+  - Obstacle
+  layers:
+  - Default
+  - TransparentFX
+  - Ignore Raycast
+  - 
+  - Water
+  - UI
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
+  m_SortingLayers:
+  - name: Default
+    uniqueID: 0
+    locked: 0
+  - name: Sky
+    uniqueID: 1831916617
+    locked: 0
+  - name: Cloud
+    uniqueID: 465425719
+    locked: 0
+  - name: Land
+    uniqueID: 843506389
+    locked: 0
+  - name: Mountain
+    uniqueID: 3954378053
+    locked: 0
+  - name: BigTree
+    uniqueID: 690202919
+    locked: 0
+  - name: SmallTree
+    uniqueID: 2783368449
+    locked: 0
+  - name: Bush
+    uniqueID: 1039118879
+    locked: 0
+  - name: Grass
+    uniqueID: 417896645
+    locked: 0
+  - name: Player
+    uniqueID: 2914527251
+    locked: 0
