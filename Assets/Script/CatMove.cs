@@ -190,7 +190,7 @@ public class CatMove : MonoBehaviour
     {
         isJumping = true;
         isGrounded = false;
-        rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+        rb.velocity = new Vector2(rb.velocity.x, jumpForce);
         Invoke("ResetJump", 0.1f);
     }
     
@@ -206,7 +206,7 @@ public class CatMove : MonoBehaviour
         targetRotationAmount = rotations * 360f;
         
         float jumpMultiplier = 1.2f + (normalizedHold * 0.3f);
-        rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce * jumpMultiplier);
+        rb.velocity = new Vector2(rb.velocity.x, jumpForce * jumpMultiplier);
         
         Debug.Log("Backflip - Hold Duration: " + holdDuration + "s, Rotations: " + rotations + ", Target Rotation: " + targetRotationAmount);
     }
@@ -238,7 +238,7 @@ public class CatMove : MonoBehaviour
         isSpeedBoosted = false;
         currentRotation = 0f;
         transform.rotation = Quaternion.Euler(0f, 0f, 0f);
-        rb.linearVelocity = Vector2.zero;
+        rb.velocity = Vector2.zero;
         rightwardForce = originalRightwardForce;
         Debug.Log("Character Reset!");
     }
