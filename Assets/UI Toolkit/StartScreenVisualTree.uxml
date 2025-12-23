@@ -1,0 +1,7 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI%20Toolkit/StartScreenStyle.uss?fileID=7433441132597879392&amp;guid=5ff5e8710ca0a594ea2ffc295ea615c9&amp;type=3#StartScreenStyle" />
+    <ui:VisualElement name="Container" style="flex-grow: 1; justify-content: center; align-items: center; flex-direction: column; align-self: stretch;">
+        <ui:Button parse-escape-sequences="true" display-tooltip-when-elided="true" name="PlayButton" style="position: absolute; opacity: 0.35; width: 400px; height: 300px;" />
+        <ui:Label tabindex="-1" text="Tap to play" parse-escape-sequences="true" display-tooltip-when-elided="true" name="PlayMessage" class="playMessage" style="white-space: nowrap; position: absolute;" />
+    </ui:VisualElement>
+</ui:UXML>

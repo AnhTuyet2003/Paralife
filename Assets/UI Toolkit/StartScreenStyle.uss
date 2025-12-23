@@ -1,0 +1,3 @@
+.playMessage {
+    font-size: 32px;
+}
