@@ -1,0 +1,6 @@
+.playMessage {
+    font-size: 32px;
+    -unity-font-definition: url("project://database/Assets/UI%20Toolkit/Fonts/at01_SDF_2.asset?fileID=11400000&guid=f826840a18328f14bbbedda043d89b3c&type=2#at01_SDF_2");
+    -unity-text-align: middle-center;
+    -unity-font-style: normal;
+}

@@ -1,0 +1,7 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
+    <Style src="project://database/Assets/UI%20Toolkit/Screens/LoadingScreenStyle.uss?fileID=7433441132597879392&amp;guid=64d897873a8fc65499b909ca235a3318&amp;type=3#LoadingScreenStyle" />
+    <ui:VisualElement name="Container" style="flex-grow: 1; align-items: center; flex-direction: column; justify-content: center; display: flex; background-image: url(&quot;project://database/Assets/UI%20Toolkit/Backgrounds/meadow.png?fileID=2800000&amp;guid=9988e53f562704945b7f892d922a2a75&amp;type=3#meadow&quot;); width: auto; height: auto; align-self: auto;">
+        <ui:Label tabindex="-1" text="Paralife" parse-escape-sequences="true" display-tooltip-when-elided="true" name="GameTitle" enable-rich-text="true" class="gameNameTitle" />
+        <ui:Label tabindex="-1" text="Loading..." parse-escape-sequences="true" display-tooltip-when-elided="true" name="PleaseWaitMessage" focusable="true" class="loadingMessage" />
+    </ui:VisualElement>
+</ui:UXML>
