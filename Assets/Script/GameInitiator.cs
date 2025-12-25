@@ -8,24 +8,18 @@ public class GameInitiator : MonoBehaviour
     private GameObject loadingScreenPrefab;
 
     [SerializeField]
-    private GameObject startingScreenPrefab;
+    private string gameSceneName = "GameScene";
 
-    [SerializeField]
-    private GameObject playerPrefab;
-
-    private GameObject _player;
     private LoadingScreen _loadingScreen;
-    private StartingScreen _startingScreen;
+    private GameManager _gameManager;
 
     private async void Start()
     {
         await BindObjects();
-        _startingScreen.Hide();
         _loadingScreen.Show();
         await InitializeObjects();
         await CreateObjects();
         _loadingScreen.Hide();
-        _startingScreen.Show();
         PrepareGame();
         await BeginGame();
     }
@@ -34,30 +28,81 @@ public class GameInitiator : MonoBehaviour
     {
         GameObject loadingScreenObj = Instantiate(loadingScreenPrefab);
         _loadingScreen = loadingScreenObj.GetComponent<LoadingScreen>();
-
-        GameObject startingScreenObj = Instantiate(startingScreenPrefab);
-        _startingScreen = startingScreenObj.GetComponent<StartingScreen>();
     }
 
     private async UniTask InitializeObjects()
     {
         DontDestroyOnLoad(_loadingScreen.gameObject);
-        DontDestroyOnLoad(_startingScreen.gameObject);
     }
 
     private async UniTask CreateObjects()
     {
-        _player = Instantiate(playerPrefab);
+        await UniTask.Delay(2_000); // Simulate some loading time
 
-        await UniTask.Delay(3_000); // Simulate some loading time
-
-        var loadingOperation = SceneManager.LoadSceneAsync("GameScene", LoadSceneMode.Additive);
+        var loadingOperation = SceneManager.LoadSceneAsync(gameSceneName, LoadSceneMode.Additive);
         await loadingOperation;
     }
 
     private void PrepareGame()
     {
-        // _gameStateMachine.Enter<GameLoopState>();
+        // Find GameManager in the loaded scene
+        _gameManager = FindObjectOfType<GameManager>();
+
+        if (_gameManager != null)
+        {
+            _gameManager.OnGameReset += OnGameManagerReset;
+            Debug.Log("GameInitiator: Subscribed to GameManager.OnGameReset event");
+        }
+        else
+        {
+            Debug.LogWarning("GameInitiator: GameManager not found in scene!");
+        }
+    }
+
+    /// <summary>Handles game reset event from GameManager - reloads the scene with loading screen.</summary>
+    private async void OnGameManagerReset()
+    {
+        Debug.Log("GameInitiator: OnGameReset event received - reloading scene");
+
+        _loadingScreen.Show();
+        await UniTask.Delay(500); // Brief loading screen
+
+        // Unsubscribe to prevent memory leaks
+        if (_gameManager != null)
+        {
+            _gameManager.OnGameReset -= OnGameManagerReset;
+        }
+
+        // Unload and reload the game scene
+        await SceneManager.UnloadSceneAsync(gameSceneName);
+
+        var loadingOperation = SceneManager.LoadSceneAsync(gameSceneName, LoadSceneMode.Additive);
+        await loadingOperation;
+
+        // Find GameManager in the loaded scene
+        _gameManager = FindObjectOfType<GameManager>();
+
+        if (_gameManager != null)
+        {
+            _gameManager.OnGameReset += OnGameManagerReset;
+            Debug.Log("GameInitiator: Subscribed to GameManager.OnGameReset event");
+        }
+        else
+        {
+            Debug.LogWarning("GameInitiator: GameManager not found in scene!");
+        }
+
+        _loadingScreen.Hide();
+        Debug.Log("GameInitiator: Scene reloaded successfully");
+    }
+
+    private void OnDestroy()
+    {
+        // Unsubscribe to prevent memory leaks
+        if (_gameManager != null)
+        {
+            _gameManager.OnGameReset -= OnGameManagerReset;
+        }
     }
 
     private async UniTask BeginGame()
