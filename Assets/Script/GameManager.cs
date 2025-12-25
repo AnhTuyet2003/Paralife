@@ -307,6 +307,8 @@ public class GameManager : MonoBehaviour
         gamerunScreen.Hide();
         pauseScreen.Hide();
 
+        //startingScreen.Show();
+
         // Reset cat position and state
         ResetCat();
 
