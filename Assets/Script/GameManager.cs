@@ -1,5 +1,6 @@
 using Cysharp.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class GameManager : MonoBehaviour
 {
@@ -56,6 +57,11 @@ public class GameManager : MonoBehaviour
 
     [SerializeField]
     private PauseScreen pauseScreenPrefab;
+
+    [SerializeField]
+    private GameOverScreen gameOverScreenPrefab; 
+
+    private GameOverScreen gameOverScreen; 
 
     private GameState currentState = GameState.STARTING;
 
@@ -115,11 +121,13 @@ public class GameManager : MonoBehaviour
         startingScreen = Instantiate(startingScreenPrefab);
         gamerunScreen = Instantiate(gamerunScreenPrefab);
         pauseScreen = Instantiate(pauseScreenPrefab);
+        gameOverScreen = Instantiate(gameOverScreenPrefab);
 
         // Initialize screens with callbacks
         startingScreen.Initialize(OnStartButtonClicked);
         gamerunScreen.Initialize(OnPauseButtonClicked);
         pauseScreen.Initialize(OnHomeButtonClicked, OnRestartButtonClicked, OnResumeButtonClicked);
+        gameOverScreen.Initialize(OnRestartButtonClicked, OnHomeButtonClicked);
 
         // Subscribe to cat collision events
         catPlayer.OnObstacleHit += OnCatCollided;
@@ -128,6 +136,7 @@ public class GameManager : MonoBehaviour
         startingScreen.Show();
         gamerunScreen.Hide();
         pauseScreen.Hide();
+        gameOverScreen.Hide();
 
         Debug.Log("GameManager: Initialized successfully");
     }
@@ -207,6 +216,8 @@ public class GameManager : MonoBehaviour
         lastBroadcastedDistance = -1f;
         lastBroadcastedScore = -1f;
 
+        EventSystem.current.SetSelectedGameObject(null);
+
         Debug.Log("GameManager: Game started");
     }
 
@@ -223,6 +234,8 @@ public class GameManager : MonoBehaviour
 
         // Update state
         currentState = GameState.PAUSED;
+
+        EventSystem.current.SetSelectedGameObject(null);
 
         Debug.Log("GameManager: Game paused");
     }
@@ -241,12 +254,16 @@ public class GameManager : MonoBehaviour
         // Update state
         currentState = GameState.RUNNING;
 
+        EventSystem.current.SetSelectedGameObject(null);
+
         Debug.Log("GameManager: Game resumed");
     }
 
     void OnRestartButtonClicked()
     {
         Debug.Log("GameManager: Restart button clicked");
+
+        EventSystem.current.SetSelectedGameObject(null);
 
         // Reset game state
         ResetGame();
@@ -257,6 +274,8 @@ public class GameManager : MonoBehaviour
     void OnHomeButtonClicked()
     {
         Debug.Log("GameManager: Home button clicked");
+
+        EventSystem.current.SetSelectedGameObject(null);
 
         // Reset game state
         ResetGame();
@@ -286,13 +305,20 @@ public class GameManager : MonoBehaviour
         gamerunScreen.Hide();
         pauseScreen.Hide();
 
-        await UniTask.Delay(3_000); // Wait for 3 seconds before resetting
+        await UniTask.Delay(1_000); // Wait for 3 seconds before resetting
 
-        currentState = GameState.STARTING;
-
-        ResetGame();
+        ShowGameOver();
 
         Debug.Log("GameManager: Cat died, returning to start screen");
+    }
+
+    void ShowGameOver()
+    {
+        // Cập nhật điểm số lên màn hình
+        gameOverScreen.SetScore(currentScore);
+        
+        // Hiện màn hình
+        gameOverScreen.Show();
     }
 
     void ResetGame()
@@ -306,8 +332,7 @@ public class GameManager : MonoBehaviour
         startingScreen.Hide();
         gamerunScreen.Hide();
         pauseScreen.Hide();
-
-        //startingScreen.Show();
+        gameOverScreen.Hide();
 
         // Reset cat position and state
         ResetCat();
