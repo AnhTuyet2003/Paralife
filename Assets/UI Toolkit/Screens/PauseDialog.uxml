@@ -1,0 +1,22 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd">
+    <Style src="project://database/Assets/PauseDialogStyle.uss?fileID=7433441132597879392&amp;guid=bf4d0213014b16348ba9316841af9598&amp;type=3#PauseDialogStyle" />
+    <ui:VisualElement name="PauseDialogRoot" style="flex-grow: 1; justify-content: center;">
+        <ui:VisualElement name="DialogContainer" class="dialogContainer">
+            <ui:Label tabindex="-1" text="Settings" parse-escape-sequences="true" display-tooltip-when-elided="true" name="SettingLabel" class="settingLabel" />
+            <ui:VisualElement name="OptionContainer" class="optionContainer" style="align-self: stretch; align-items: stretch;">
+                <ui:Button text="Button" parse-escape-sequences="true" display-tooltip-when-elided="true" name="HomeOption" class="optionButton">
+                    <ui:VisualElement name="OptionIcon" class="optionIcon" />
+                    <ui:Label tabindex="-1" text="Home" parse-escape-sequences="true" display-tooltip-when-elided="true" name="OptionName" class="optionName" />
+                </ui:Button>
+                <ui:Button text="Button" parse-escape-sequences="true" display-tooltip-when-elided="true" name="RestartOption" class="optionButton">
+                    <ui:VisualElement name="OptionIcon" class="optionIcon" style="background-image: url(&quot;project://database/Assets/UI%20Toolkit/Sprites/IconsShadow-64.png?fileID=1179677806&amp;guid=bf059ab01e3fec84f9fafd8d3cb5ba53&amp;type=3#IconsShadow-64_89&quot;);" />
+                    <ui:Label tabindex="-1" text="Restart" parse-escape-sequences="true" display-tooltip-when-elided="true" name="OptionName" class="optionName" />
+                </ui:Button>
+                <ui:Button text="Button" parse-escape-sequences="true" display-tooltip-when-elided="true" name="ResumeOption" class="optionButton">
+                    <ui:VisualElement name="OptionIcon" class="optionIcon" style="background-image: url(&quot;project://database/Assets/UI%20Toolkit/Sprites/IconsShadow-64.png?fileID=-2089398752&amp;guid=bf059ab01e3fec84f9fafd8d3cb5ba53&amp;type=3#IconsShadow-64_74&quot;);" />
+                    <ui:Label tabindex="-1" text="Resume" parse-escape-sequences="true" display-tooltip-when-elided="true" name="OptionName" class="optionName" />
+                </ui:Button>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
