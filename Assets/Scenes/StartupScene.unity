@@ -167,8 +167,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   loadingScreenPrefab: {fileID: 2410301815470638066, guid: 7204cac93e4bc044ca3c6c5e964c52d6, type: 3}
-  startingScreenPrefab: {fileID: 140499471165295392, guid: e590f0583cd658d429ad217848985601, type: 3}
-  playerPrefab: {fileID: 1080178580090458175, guid: 85e4d31ced9e9ff4a9640dccb6db1d74, type: 3}
+  gameSceneName: SampleScene
 --- !u!1 &1982389109
 GameObject:
   m_ObjectHideFlags: 0
@@ -179,7 +178,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1982389112}
   - component: {fileID: 1982389111}
-  - component: {fileID: 1982389110}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -187,14 +185,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!81 &1982389110
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1982389109}
-  m_Enabled: 1
 --- !u!20 &1982389111
 Camera:
   m_ObjectHideFlags: 0
