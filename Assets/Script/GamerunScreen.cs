@@ -18,6 +18,9 @@ public class GamerunScreen : MonoBehaviour
         _runningDistanceDisplayingLabel = _uiDocument.rootVisualElement.Q<Label>("RunningDistance");
         _scoreDisplayingLabel = _uiDocument.rootVisualElement.Q<Label>("Score");
         _pauseButton = _uiDocument.rootVisualElement.Q<Button>("PauseButton");
+
+        // TODO: Show the score if the score system is implemented
+        _scoreDisplayingLabel.style.display = DisplayStyle.None;
     }
 
     public void Initialize(Action onPauseButtonClicked)
@@ -28,7 +31,7 @@ public class GamerunScreen : MonoBehaviour
     /// <summary>Sets the distance display value without triggering callbacks.</summary>
     public void SetDistanceValue(int value)
     {
-        _runningDistanceDisplayingLabel.text = $"{value} m";
+        _runningDistanceDisplayingLabel.text = $"{value}m";
     }
 
     /// <summary>Sets the score display value without triggering callbacks.</summary>

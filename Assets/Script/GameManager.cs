@@ -59,9 +59,9 @@ public class GameManager : MonoBehaviour
     private PauseScreen pauseScreenPrefab;
 
     [SerializeField]
-    private GameOverScreen gameOverScreenPrefab; 
+    private GameOverScreen gameOverScreenPrefab;
 
-    private GameOverScreen gameOverScreen; 
+    private GameOverScreen gameOverScreen;
 
     private GameState currentState = GameState.STARTING;
 
@@ -315,8 +315,8 @@ public class GameManager : MonoBehaviour
     void ShowGameOver()
     {
         // Cập nhật điểm số lên màn hình
-        gameOverScreen.SetScore(currentScore);
-        
+        gameOverScreen.SetScore(Mathf.FloorToInt(currentDistance));
+
         // Hiện màn hình
         gameOverScreen.Show();
     }
