@@ -15,7 +15,7 @@ public class StartingScreen : MonoBehaviour
     {
         _uiDocument = GetComponent<UIDocument>();
 
-        _startButton = _uiDocument.rootVisualElement.Q<Button>("PlayButton");
+        _startButton = _uiDocument.rootVisualElement.Q<Button>("TapToPlayArea");
         _startButton.RegisterCallback<ClickEvent>(ev => OnStartButtonClicked());
     }
 

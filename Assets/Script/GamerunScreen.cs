@@ -7,30 +7,34 @@ public class GamerunScreen : MonoBehaviour
 {
     private UIDocument _uiDocument;
 
-    private TextField _runningDistanceDisplayingTextField;
-    private TextField _scoreDisplayingTextField;
+    private Label _runningDistanceDisplayingLabel;
+    private Label _scoreDisplayingLabel;
     private Button _pauseButton;
 
     void Awake()
     {
         _uiDocument = GetComponent<UIDocument>();
 
-        _runningDistanceDisplayingTextField = _uiDocument.rootVisualElement.Q<TextField>(
-            "RunningDistance"
-        );
-        _scoreDisplayingTextField = _uiDocument.rootVisualElement.Q<TextField>("Score");
+        _runningDistanceDisplayingLabel = _uiDocument.rootVisualElement.Q<Label>("RunningDistance");
+        _scoreDisplayingLabel = _uiDocument.rootVisualElement.Q<Label>("Score");
         _pauseButton = _uiDocument.rootVisualElement.Q<Button>("PauseButton");
     }
 
-    public void Initialize(
-        EventCallback<ChangeEvent<string>> onRunningDistanceChanged,
-        EventCallback<ChangeEvent<string>> onScoreChanged,
-        Action onPauseButtonClicked
-    )
+    public void Initialize(Action onPauseButtonClicked)
     {
-        _runningDistanceDisplayingTextField.RegisterValueChangedCallback(onRunningDistanceChanged);
-        _scoreDisplayingTextField.RegisterValueChangedCallback(onScoreChanged);
         _pauseButton.clicked += onPauseButtonClicked;
+    }
+
+    /// <summary>Sets the distance display value without triggering callbacks.</summary>
+    public void SetDistanceValue(int value)
+    {
+        _runningDistanceDisplayingLabel.text = $"{value} m";
+    }
+
+    /// <summary>Sets the score display value without triggering callbacks.</summary>
+    public void SetScoreValue(int value)
+    {
+        _scoreDisplayingLabel.text = value.ToString();
     }
 
     public void Show()
