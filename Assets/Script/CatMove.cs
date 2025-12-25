@@ -2,9 +2,9 @@ using UnityEngine;
 
 public class CatMove : MonoBehaviour
 {
-    public float moveSpeed = 5f;
-    public float rightwardForce = 2f;
-    public float jumpForce = 5f;
+    public float rightwardForce = 50f;
+    public float maxSpeed = 15f;
+    public float jumpForce = 12f;
     public float backflipThreshold = 0.5f;
     public float backflipRotationSpeed = 720f;
     public float maxHoldTime = 2f;
@@ -13,6 +13,9 @@ public class CatMove : MonoBehaviour
     public float failedAngleTolerance = 45f;
     public float speedBoostMultiplier = 1.5f;
     public float speedBoostDuration = 2f;
+    public float gravity = 3f;
+    public float slopeSpeedMultiplier = 1.3f;
+    public float airDrag = 0.98f;
     public bool isRunning = false;
     public bool isJumping = false;
     public bool isBackflipping = false;
@@ -35,20 +38,36 @@ public class CatMove : MonoBehaviour
     void Start()
     {
         QualitySettings.vSyncCount = 0;
-        Application.targetFrameRate = 16;
+        Application.targetFrameRate = 60;
         animator = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
         
         if (rb == null)
         {
+            Debug.LogError("No Rigidbody2D found! Adding one...");
             rb = gameObject.AddComponent<Rigidbody2D>();
-            rb.constraints = RigidbodyConstraints2D.FreezeRotation;
         }
         
+        rb.bodyType = RigidbodyType2D.Dynamic;
+        rb.mass = 1f;
+        rb.drag = 0f;
+        rb.angularDrag = 0.05f;
+        rb.constraints = RigidbodyConstraints2D.None;
+        rb.gravityScale = gravity;
+        rb.freezeRotation = false;
+        rb.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+        rb.interpolation = RigidbodyInterpolation2D.Interpolate;
+        
         originalRightwardForce = rightwardForce;
+        
+        Debug.Log("=== CatMove Initialized ===");
+        Debug.Log("Rigidbody2D BodyType: " + rb.bodyType);
+        Debug.Log("Mass: " + rb.mass);
+        Debug.Log("Drag: " + rb.drag);
+        Debug.Log("Gravity Scale: " + rb.gravityScale);
+        Debug.Log("Rightward Force: " + rightwardForce);
     }
     
-    // Update is called once per frame
     void Update()
     {
         if (isBackflipFailed)
@@ -57,21 +76,38 @@ public class CatMove : MonoBehaviour
         }
         
         HandleSpeedBoost();
-        
-        float horizontal = Input.GetAxis("Horizontal");
-        float vertical = Input.GetAxis("Vertical");
-
-        Vector3 movement = new Vector3(horizontal, vertical, 0f);
-        Vector3 autoMove = new Vector3(rightwardForce * Time.deltaTime, 0f, 0f);
-        
-        transform.Translate(movement * moveSpeed * Time.deltaTime + autoMove);
-        
         HandleTouchInput();
+        UpdateAnimations();
+    }
+    
+    void FixedUpdate()
+    {
+        if (isBackflipFailed)
+        {
+            return;
+        }
+        
+        float currentSpeed = isSpeedBoosted ? originalRightwardForce * speedBoostMultiplier : rightwardForce;
+        
+        if (rb.velocity.x < maxSpeed)
+        {
+            rb.AddForce(Vector2.right * currentSpeed, ForceMode2D.Force);
+        }
+        
+        if (rb.velocity.x > maxSpeed)
+        {
+            rb.velocity = new Vector2(maxSpeed, rb.velocity.y);
+        }
+        
+        if (!isGrounded)
+        {
+            rb.velocity = new Vector2(rb.velocity.x * airDrag, rb.velocity.y);
+        }
         
         if (isBackflipping)
         {
-            float rotationStep = backflipRotationSpeed * Time.deltaTime;
-            transform.Rotate(0f, 0f, rotationStep);
+            float rotationStep = backflipRotationSpeed * Time.fixedDeltaTime;
+            rb.MoveRotation(rb.rotation + rotationStep);
             currentRotation += rotationStep;
             
             if (currentRotation >= targetRotationAmount)
@@ -79,51 +115,58 @@ public class CatMove : MonoBehaviour
                 isBackflipping = false;
                 isJumping = false;
                 currentRotation = 0f;
-                transform.rotation = Quaternion.Euler(0f, 0f, 0f);
             }
         }
-        
-        if (movement != Vector3.zero || autoMove != Vector3.zero)
+        else if (isGrounded && !isBackflipFailed)
         {
-            isRunning = true;
+            float targetAngle = 0f;
+            float currentAngle = rb.rotation;
+            if (currentAngle > 180f) currentAngle -= 360f;
+            if (currentAngle < -180f) currentAngle += 360f;
+            
+            float smoothRotation = Mathf.LerpAngle(currentAngle, targetAngle, 10f * Time.fixedDeltaTime);
+            rb.MoveRotation(smoothRotation);
         }
-        else
+        
+        isRunning = rb.velocity.magnitude > 0.1f;
+        
+        if (Time.frameCount % 30 == 0)
         {
-            isRunning = false;
+            Debug.Log("=== Cat Physics Status ===");
+            Debug.Log("Velocity: " + rb.velocity);
+            Debug.Log("Position: " + transform.position);
+            Debug.Log("Grounded: " + isGrounded);
+            Debug.Log("Mass: " + rb.mass + ", Drag: " + rb.drag);
+            Debug.Log("Force Applied: " + currentSpeed);
         }
-        
-        animator.SetBool("IsJumping", isJumping);
-        animator.SetBool("IsRunning", isRunning);
-        animator.SetBool("IsBackflipping", isBackflipping);
-        animator.SetBool("IsBackflipFailed", isBackflipFailed);
-        animator.SetBool("IsSpeedBoosted", isSpeedBoosted);
-        
-        Debug.Log("IsRunning: " + isRunning + ", IsJumping: " + isJumping + ", IsBackflipping: " + isBackflipping + ", Failed: " + isBackflipFailed + ", SpeedBoosted: " + isSpeedBoosted);
-        Debug.Log("IsGrounded: " + isGrounded + ", CurrentRotation: " + currentRotation + ", Target: " + targetRotationAmount + ", Speed: " + rightwardForce);
+    }
+    
+    void UpdateAnimations()
+    {
+        if (animator != null)
+        {
+            animator.SetBool("IsJumping", isJumping);
+            animator.SetBool("IsRunning", isRunning);
+            animator.SetBool("IsBackflipping", isBackflipping);
+            animator.SetBool("IsBackflipFailed", isBackflipFailed);
+            animator.SetBool("IsSpeedBoosted", isSpeedBoosted);
+        }
     }
     
     void HandleSpeedBoost()
     {
         if (isSpeedBoosted && Time.time >= speedBoostEndTime)
         {
-            float smoothSpeed = 5f;
-            rightwardForce = Mathf.Lerp(rightwardForce, originalRightwardForce, smoothSpeed * Time.deltaTime);
-            
-            if (Mathf.Abs(rightwardForce - originalRightwardForce) < 0.01f)
-            {
-                rightwardForce = originalRightwardForce;
-                isSpeedBoosted = false;
-                Debug.Log("Speed boost ended - back to normal speed");
-            }
+            isSpeedBoosted = false;
+            Debug.Log("Speed boost ended - back to normal speed");
         }
     }
     
     void ActivateSpeedBoost()
     {
         isSpeedBoosted = true;
-        rightwardForce = originalRightwardForce * speedBoostMultiplier;
         speedBoostEndTime = Time.time + speedBoostDuration;
-        Debug.Log("Speed boost activated! New speed: " + rightwardForce);
+        Debug.Log("Speed boost activated!");
     }
     
     void HandleTouchInput()
@@ -191,7 +234,7 @@ public class CatMove : MonoBehaviour
         isJumping = true;
         isGrounded = false;
         rb.velocity = new Vector2(rb.velocity.x, jumpForce);
-        Invoke("ResetJump", 0.1f);
+        Debug.Log("Jump! New velocity: " + rb.velocity);
     }
     
     void PerformBackflip(float holdDuration)
@@ -205,20 +248,15 @@ public class CatMove : MonoBehaviour
         float rotations = Mathf.Lerp(minRotations, maxRotations, normalizedHold);
         targetRotationAmount = rotations * 360f;
         
-        float jumpMultiplier = 1.2f + (normalizedHold * 0.3f);
+        float jumpMultiplier = 1.2f + (normalizedHold * 0.5f);
         rb.velocity = new Vector2(rb.velocity.x, jumpForce * jumpMultiplier);
         
         Debug.Log("Backflip - Hold Duration: " + holdDuration + "s, Rotations: " + rotations + ", Target Rotation: " + targetRotationAmount);
     }
     
-    void ResetJump()
-    {
-        isJumping = false;
-    }
-    
     bool CheckBackflipSuccess()
     {
-        float currentAngle = transform.eulerAngles.z;
+        float currentAngle = rb.rotation;
         
         if (currentAngle > 180f)
             currentAngle -= 360f;
@@ -237,17 +275,21 @@ public class CatMove : MonoBehaviour
         isJumping = false;
         isSpeedBoosted = false;
         currentRotation = 0f;
-        transform.rotation = Quaternion.Euler(0f, 0f, 0f);
+        rb.rotation = 0f;
         rb.velocity = Vector2.zero;
+        rb.angularVelocity = 0f;
         rightwardForce = originalRightwardForce;
         Debug.Log("Character Reset!");
     }
     
     void OnCollisionEnter2D(Collision2D collision)
     {
+        Debug.Log("Collision detected with: " + collision.gameObject.name + ", Tag: " + collision.gameObject.tag + ", Layer: " + LayerMask.LayerToName(collision.gameObject.layer));
+        
         if (collision.gameObject.CompareTag("Ground") || collision.gameObject.layer == LayerMask.NameToLayer("Ground"))
         {
             isGrounded = true;
+            Debug.Log("Cat is now grounded!");
             
             if (isBackflipping)
             {
@@ -259,8 +301,9 @@ public class CatMove : MonoBehaviour
                     isBackflipping = false;
                     isJumping = false;
                     currentRotation = 0f;
-                    transform.rotation = Quaternion.Euler(0f, 0f, 0f);
-                    animator.SetBool("IsBackflipFailed", false);
+                    rb.rotation = 0f;
+                    rb.angularVelocity = 0f;
+                    if (animator != null) animator.SetBool("IsBackflipFailed", false);
                     
                     ActivateSpeedBoost();
                 }
@@ -270,14 +313,16 @@ public class CatMove : MonoBehaviour
                     isBackflipFailed = true;
                     isBackflipping = false;
                     isJumping = false;
-                    rightwardForce = 0f;
-                    animator.SetBool("IsBackflipFailed", true);
+                    rb.velocity = Vector2.zero;
+                    rb.angularVelocity = 0f;
+                    if (animator != null) animator.SetBool("IsBackflipFailed", true);
                 }
             }
             else if (!isBackflipFailed)
             {
                 isJumping = false;
-                transform.rotation = Quaternion.Euler(0f, 0f, 0f);
+                rb.rotation = 0f;
+                rb.angularVelocity = 0f;
             }
         }
     }
@@ -287,6 +332,15 @@ public class CatMove : MonoBehaviour
         if (collision.gameObject.CompareTag("Ground") || collision.gameObject.layer == LayerMask.NameToLayer("Ground"))
         {
             isGrounded = true;
+        }
+    }
+    
+    void OnCollisionExit2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Ground") || collision.gameObject.layer == LayerMask.NameToLayer("Ground"))
+        {
+            isGrounded = false;
+            Debug.Log("Cat left the ground!");
         }
     }
 }
