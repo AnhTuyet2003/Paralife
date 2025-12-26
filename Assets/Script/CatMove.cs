@@ -41,7 +41,7 @@ public class CatMove : MonoBehaviour
     void Start()
     {
         QualitySettings.vSyncCount = 0;
-        Application.targetFrameRate = 60;
+        Application.targetFrameRate = 30;
         animator = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
         
