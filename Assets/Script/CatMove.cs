@@ -19,11 +19,18 @@ public class CatMove : MonoBehaviour
     public float gravity = 3f;
     public float slopeSpeedMultiplier = 1.3f;
     public float airDrag = 0.98f;
+    
+    [Header("Flying Settings")]
+    public float flyingDuration = 5f;
+    public float flyingVerticalSpeed = 8f;
+    public float flyingGravityScale = 0.5f;
+    
     public bool isRunning = false;
     public bool isJumping = false;
     public bool isBackflipping = false;
     public bool isBackflipFailed = false;
     public bool isSpeedBoosted = false;
+    public bool isFlying = false;
     public Animator animator;
     public Rigidbody2D rb;
     
@@ -37,6 +44,8 @@ public class CatMove : MonoBehaviour
     private float fKeyPressStartTime;
     private float originalRightwardForce;
     private float speedBoostEndTime;
+    private float flyingEndTime;
+    private float originalGravityScale;
     
     void Start()
     {
@@ -62,6 +71,7 @@ public class CatMove : MonoBehaviour
         rb.interpolation = RigidbodyInterpolation2D.Interpolate;
         
         originalRightwardForce = rightwardForce;
+        originalGravityScale = rb.gravityScale;
         
         Debug.Log("=== CatMove Initialized ===");
         Debug.Log("Rigidbody2D BodyType: " + rb.bodyType);
@@ -79,6 +89,7 @@ public class CatMove : MonoBehaviour
         }
         
         HandleSpeedBoost();
+        HandleFlying();
         HandleTouchInput();
         UpdateAnimations();
     }
@@ -102,12 +113,16 @@ public class CatMove : MonoBehaviour
             rb.velocity = new Vector2(maxSpeed, rb.velocity.y);
         }
         
-        if (!isGrounded)
+        if (!isGrounded && !isFlying)
         {
             rb.velocity = new Vector2(rb.velocity.x * airDrag, rb.velocity.y);
         }
         
-        if (isBackflipping)
+        if (isFlying)
+        {
+            HandleFlyingMovement();
+        }
+        else if (isBackflipping)
         {
             float rotationStep = backflipRotationSpeed * Time.fixedDeltaTime;
             rb.MoveRotation(rb.rotation + rotationStep);
@@ -139,9 +154,68 @@ public class CatMove : MonoBehaviour
             Debug.Log("Velocity: " + rb.velocity);
             Debug.Log("Position: " + transform.position);
             Debug.Log("Grounded: " + isGrounded);
+            Debug.Log("Flying: " + isFlying);
             Debug.Log("Mass: " + rb.mass + ", Drag: " + rb.drag);
             Debug.Log("Force Applied: " + currentSpeed);
         }
+    }
+    
+    void HandleFlying()
+    {
+        if (isFlying && Time.time >= flyingEndTime)
+        {
+            DeactivateFlying();
+        }
+    }
+    
+    void HandleFlyingMovement()
+    {
+        float verticalInput = 0f;
+        
+        // Check for arrow key input
+        if (Input.GetKey(KeyCode.UpArrow))
+        {
+            verticalInput = 1f;
+        }
+        else if (Input.GetKey(KeyCode.DownArrow))
+        {
+            verticalInput = -1f;
+        }
+        
+        // Apply vertical movement
+        if (verticalInput != 0f)
+        {
+            rb.velocity = new Vector2(rb.velocity.x, verticalInput * flyingVerticalSpeed);
+        }
+        else
+        {
+            // Gradually slow down vertical movement when no input
+            rb.velocity = new Vector2(rb.velocity.x, rb.velocity.y * 0.95f);
+        }
+        
+        // Keep rotation stable while flying
+        rb.rotation = 0f;
+        rb.angularVelocity = 0f;
+    }
+    
+    public void ActivateFlying()
+    {
+        if (isFlying) return;
+        
+        isFlying = true;
+        isJumping = false;
+        isBackflipping = false;
+        flyingEndTime = Time.time + flyingDuration;
+        rb.gravityScale = flyingGravityScale;
+        
+        Debug.Log("Flying activated! Duration: " + flyingDuration + " seconds");
+    }
+    
+    void DeactivateFlying()
+    {
+        isFlying = false;
+        rb.gravityScale = originalGravityScale;
+        Debug.Log("Flying ended - back to normal");
     }
     
     void UpdateAnimations()
@@ -155,6 +229,7 @@ public class CatMove : MonoBehaviour
             animator.SetBool("IsBackflipping", isBackflipping);
             animator.SetBool("IsBackflipFailed", isBackflipFailed);
             animator.SetBool("IsSpeedBoosted", isSpeedBoosted);
+            animator.SetBool("IsFlying", isFlying);
         }
     }
     
@@ -187,7 +262,7 @@ public class CatMove : MonoBehaviour
             float touchDuration = Time.time - touchStartTime;
             isTouching = false;
             
-            if (isGrounded && !isBackflipFailed)
+            if (isGrounded && !isBackflipFailed && !isFlying)
             {
                 if (touchDuration < backflipThreshold)
                 {
@@ -203,7 +278,7 @@ public class CatMove : MonoBehaviour
         
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            if (isGrounded && !isBackflipFailed)
+            if (isGrounded && !isBackflipFailed && !isFlying)
             {
                 PerformJump();
             }
@@ -211,7 +286,7 @@ public class CatMove : MonoBehaviour
         
         if (Input.GetKeyDown(KeyCode.F))
         {
-            if (isGrounded && !isBackflipFailed)
+            if (isGrounded && !isBackflipFailed && !isFlying)
             {
                 isHoldingF = true;
                 fKeyPressStartTime = Time.time;
@@ -220,7 +295,7 @@ public class CatMove : MonoBehaviour
         
         if (Input.GetKeyUp(KeyCode.F))
         {
-            if (isHoldingF && isGrounded && !isBackflipFailed)
+            if (isHoldingF && isGrounded && !isBackflipFailed && !isFlying)
             {
                 float holdDuration = Time.time - fKeyPressStartTime;
                 PerformBackflip(holdDuration);
@@ -231,6 +306,12 @@ public class CatMove : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.R))
         {
             ResetCharacter();
+        }
+        
+        // Test flying with G key (you can remove this or change the key)
+        if (Input.GetKeyDown(KeyCode.G))
+        {
+            ActivateFlying();
         }
     }
     
@@ -279,10 +360,12 @@ public class CatMove : MonoBehaviour
         isBackflipping = false;
         isJumping = false;
         isSpeedBoosted = false;
+        isFlying = false;
         currentRotation = 0f;
         rb.rotation = 0f;
         rb.velocity = Vector2.zero;
         rb.angularVelocity = 0f;
+        rb.gravityScale = originalGravityScale;
         rightwardForce = originalRightwardForce;
         Debug.Log("Character Reset!");
     }
@@ -331,7 +414,7 @@ public class CatMove : MonoBehaviour
                     if (animator != null) animator.SetBool("IsBackflipFailed", true);
                 }
             }
-            else if (!isBackflipFailed)
+            else if (!isBackflipFailed && !isFlying)
             {
                 isJumping = false;
                 rb.rotation = 0f;
@@ -344,7 +427,10 @@ public class CatMove : MonoBehaviour
     {
         if (collision.gameObject.CompareTag("Ground") || collision.gameObject.layer == LayerMask.NameToLayer("Ground"))
         {
-            isGrounded = true;
+            if (!isFlying)
+            {
+                isGrounded = true;
+            }
         }
     }
     
