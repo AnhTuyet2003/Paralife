@@ -122,11 +122,6 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!4 &109049250 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 8713989214300214013, guid: 85e4d31ced9e9ff4a9640dccb6db1d74, type: 3}
-  m_PrefabInstance: {fileID: 379932942}
-  m_PrefabAsset: {fileID: 0}
 --- !u!114 &129443051 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 3622919346599933559, guid: 85e4d31ced9e9ff4a9640dccb6db1d74, type: 3}
@@ -542,7 +537,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameManager: {fileID: 140516218}
   environmentContainer: {fileID: 298821062}
-  player: {fileID: 109049250}
+  player: {fileID: 752929989}
   spawnDistance: 50
   initialChunks: 3
   jumpChance: 0.3
