@@ -8,6 +8,6 @@ namespace Collectibles.PowerUps
         None = 0,
         Magnet = 1,
         ProtectionCharm = 2,
-        GoodFortuneCoin = 3
+        GoodFortuneCoin = 3,
     }
 }

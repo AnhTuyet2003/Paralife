@@ -14,15 +14,9 @@ namespace Collectibles.PowerUps
 
         public event Action<IPowerUpEffect> OnEffectDepleted;
 
-        protected readonly CatMove player;
         protected bool isActive;
 
-        protected PowerUpEffectBase(CatMove player)
-        {
-            this.player = player;
-        }
-
-        public virtual void Apply()
+        public virtual void Apply(CatMove player)
         {
             isActive = true;
             Debug.Log($"[PowerUp] {Type} applied");
@@ -34,7 +28,7 @@ namespace Collectibles.PowerUps
             Debug.Log($"[PowerUp] {Type} cancelled");
         }
 
-        public virtual void Update(float deltaTime, float remainingDuration)
+        public virtual void Update(CatMove player, float deltaTime, float remainingDuration)
         {
             // Override in derived classes for per-frame logic
         }

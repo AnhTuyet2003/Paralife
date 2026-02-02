@@ -23,7 +23,7 @@ namespace Collectibles.PowerUps
         /// Apply the effect to the player.
         /// Called by PowerUpResolver when activating.
         /// </summary>
-        void Apply();
+        void Apply(CatMove player);
 
         /// <summary>
         /// Cancel/cleanup the effect.
@@ -35,9 +35,10 @@ namespace Collectibles.PowerUps
         /// Called each frame while active.
         /// Resolver passes remaining duration for effects that need it.
         /// </summary>
+        /// <param name="player">The player to apply the effect to</param>
         /// <param name="deltaTime">Time since last frame</param>
         /// <param name="remainingDuration">Remaining duration in seconds (managed by resolver)</param>
-        void Update(float deltaTime, float remainingDuration);
+        void Update(CatMove player, float deltaTime, float remainingDuration);
 
         /// <summary>
         /// Called by resolver when duration expires (for cleanup before Cancel).
