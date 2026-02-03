@@ -60,6 +60,14 @@ public class GameManager : MonoBehaviour
 
     [SerializeField]
     private GameOverScreen gameOverScreenPrefab;
+    
+    [SerializeField]
+    private HealthBar healthBarPrefab;
+    
+    [Header("UI Canvas")]
+    [SerializeField]
+    [Tooltip("The Canvas that will contain the Health Bar UI")]
+    private Canvas uiCanvas;
 
     [Header("Background Music")]
     [SerializeField]
@@ -75,14 +83,37 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private float musicFadeDuration = 1.0f;
 
+    [Header("Enemy Spawning")]
+    [SerializeField]
+    private GameObject gatorPrefab;
+    
+    [SerializeField]
+    private GameObject birdPrefab;
+    
+    [SerializeField]
+    private float enemySpawnInterval = 30f;
+    
+    [SerializeField]
+    private float firstEnemySpawnDelay = 15f;
+    
+    [Range(0f, 1f)]
+    [SerializeField]
+    private float gatorSpawnChance = 0.5f;
+    
+    [SerializeField]
+    private Vector3 gatorSpawnOffset = new Vector3(-15f, 3f, 0f);
+    
+    [SerializeField]
+    private Vector3 birdSpawnOffset = new Vector3(15f, 5f, 0f);
+
     private GameOverScreen gameOverScreen;
-
     private GameState currentState = GameState.STARTING;
-
     private StartingScreen startingScreen;
     private GamerunScreen gamerunScreen;
     private PauseScreen pauseScreen;
-
+    private HealthBar healthBar;
+    private PlayerHealth playerHealth;
+    
     private float initialCatMaxSpeed;
     private Vector3 spawnPositionOffset;
     private float currentDistance = 0f;
@@ -92,6 +123,10 @@ public class GameManager : MonoBehaviour
     
     private AudioSource musicAudioSource;
     private bool isFadingMusic = false;
+    
+    private float enemySpawnTimer = 0f;
+    private bool firstEnemySpawned = false;
+    private GameObject currentEnemy;
 
     #endregion
 
@@ -126,6 +161,9 @@ public class GameManager : MonoBehaviour
 
         // Setup background music
         SetupBackgroundMusic();
+        
+        // Setup player health
+        SetupPlayerHealth();
 
         // Store initial cat max speed
         initialCatMaxSpeed = catPlayer.maxSpeed;
@@ -142,6 +180,34 @@ public class GameManager : MonoBehaviour
         gamerunScreen = Instantiate(gamerunScreenPrefab);
         pauseScreen = Instantiate(pauseScreenPrefab);
         gameOverScreen = Instantiate(gameOverScreenPrefab);
+        
+        // Instantiate health bar and parent it to Canvas
+        healthBar = Instantiate(healthBarPrefab);
+        
+        // Use assigned Canvas or find one in scene
+        Canvas canvas = uiCanvas;
+        if (canvas == null)
+        {
+            // Fallback: try to find Canvas in scene if not assigned
+            canvas = FindObjectOfType<Canvas>();
+            Debug.LogWarning("GameManager: UI Canvas not assigned! Using FindObjectOfType as fallback.");
+        }
+        
+        if (canvas != null)
+        {
+            healthBar.transform.SetParent(canvas.transform, false);
+            Debug.Log("GameManager: HealthBar parented to Canvas: " + canvas.name);
+        }
+        else
+        {
+            Debug.LogError("GameManager: No Canvas found in scene! HealthBar will not be visible.");
+        }
+
+        // Initialize health bar with player's max health
+        if (healthBar != null && playerHealth != null)
+        {
+            healthBar.Initialize(playerHealth.GetMaxHealth());
+        }
 
         // Initialize screens with callbacks
         startingScreen.Initialize(OnStartButtonClicked);
@@ -157,6 +223,7 @@ public class GameManager : MonoBehaviour
         gamerunScreen.Hide();
         pauseScreen.Hide();
         gameOverScreen.Hide();
+        healthBar.gameObject.SetActive(false);
 
         Debug.Log("GameManager: Initialized successfully");
     }
@@ -181,6 +248,7 @@ public class GameManager : MonoBehaviour
 
         UpdateDistance();
         UpdateScore();
+        UpdateEnemySpawning();
     }
 
     void OnDestroy()
@@ -191,10 +259,176 @@ public class GameManager : MonoBehaviour
             catPlayer.OnObstacleHit -= OnCatCollided;
         }
         
+        // Unsubscribe from player health events
+        if (playerHealth != null)
+        {
+            playerHealth.OnHealthChanged -= OnPlayerHealthChanged;
+            playerHealth.OnPlayerDied -= OnPlayerDied;
+        }
+        
         // Stop music
         if (musicAudioSource != null)
         {
             musicAudioSource.Stop();
+        }
+        
+        // Destroy current enemy if exists
+        if (currentEnemy != null)
+        {
+            Destroy(currentEnemy);
+        }
+    }
+
+    #endregion
+
+    //---------------------------------------------------------------------------------------------
+
+    #region Player Health Methods
+
+    void SetupPlayerHealth()
+    {
+        // Add or get PlayerHealth component
+        playerHealth = catPlayer.GetComponent<PlayerHealth>();
+        if (playerHealth == null)
+        {
+            playerHealth = catPlayer.gameObject.AddComponent<PlayerHealth>();
+        }
+        
+        // Subscribe to health events
+        playerHealth.OnHealthChanged += OnPlayerHealthChanged;
+        playerHealth.OnPlayerDied += OnPlayerDied;
+        
+        Debug.Log("GameManager: Player health system initialized");
+    }
+
+    void OnPlayerHealthChanged(int currentHealth, int maxHealth)
+    {
+        // Update health bar
+        if (healthBar != null)
+        {
+            healthBar.UpdateHealth(currentHealth, maxHealth);
+        }
+        
+        Debug.Log("GameManager: Player health changed to " + currentHealth + "/" + maxHealth);
+    }
+
+    void OnPlayerDied()
+    {
+        Debug.Log("GameManager: Player died from health loss!");
+        
+        if (currentState == GameState.DEAD)
+        {
+            return; // Already dead
+        }
+        
+        // Mark as dead
+        currentState = GameState.DEAD;
+        
+        // Stop cat
+        catPlayer.maxSpeed = 0f;
+        catPlayer.rb.velocity = Vector2.zero;
+        catPlayer.rb.angularVelocity = 0f;
+        
+        // Hide active screens
+        gamerunScreen.Hide();
+        pauseScreen.Hide();
+        
+        // Wait and show game over
+        WaitAndShowGameOver();
+    }
+
+    async void WaitAndShowGameOver()
+    {
+        await UniTask.Delay(1_000);
+        ShowGameOver();
+    }
+
+    #endregion
+
+    //---------------------------------------------------------------------------------------------
+
+    #region Enemy Spawning Methods
+
+    void UpdateEnemySpawning()
+    {
+        enemySpawnTimer += Time.deltaTime;
+        
+        // First enemy spawn
+        if (!firstEnemySpawned && enemySpawnTimer >= firstEnemySpawnDelay)
+        {
+            SpawnRandomEnemy();
+            firstEnemySpawned = true;
+            enemySpawnTimer = 0f;
+        }
+        // Subsequent enemy spawns
+        else if (firstEnemySpawned && enemySpawnTimer >= enemySpawnInterval)
+        {
+            SpawnRandomEnemy();
+            enemySpawnTimer = 0f;
+        }
+    }
+
+    void SpawnRandomEnemy()
+    {
+        // Destroy previous enemy if still exists
+        if (currentEnemy != null)
+        {
+            Destroy(currentEnemy);
+        }
+        
+        // Random chance to spawn Gator or Bird
+        float randomValue = Random.value;
+        
+        if (randomValue < gatorSpawnChance)
+        {
+            SpawnGator();
+        }
+        else
+        {
+            SpawnBird();
+        }
+    }
+
+    void SpawnGator()
+    {
+        if (gatorPrefab == null)
+        {
+            Debug.LogWarning("GameManager: Gator prefab not assigned!");
+            return;
+        }
+        
+        // Spawn position relative to player
+        Vector3 spawnPosition = catPlayer.transform.position + gatorSpawnOffset;
+        currentEnemy = Instantiate(gatorPrefab, spawnPosition, Quaternion.identity);
+        
+        Debug.Log("GameManager: Spawned Gator enemy at " + spawnPosition);
+    }
+
+    void SpawnBird()
+    {
+        if (birdPrefab == null)
+        {
+            Debug.LogWarning("GameManager: Bird prefab not assigned!");
+            return;
+        }
+        
+        // Spawn position relative to player
+        Vector3 spawnPosition = catPlayer.transform.position + birdSpawnOffset;
+        currentEnemy = Instantiate(birdPrefab, spawnPosition, Quaternion.identity);
+        
+        Debug.Log("GameManager: Spawned Bird enemy at " + spawnPosition);
+    }
+
+    void ResetEnemySpawning()
+    {
+        enemySpawnTimer = 0f;
+        firstEnemySpawned = false;
+        
+        // Destroy current enemy if exists
+        if (currentEnemy != null)
+        {
+            Destroy(currentEnemy);
+            currentEnemy = null;
         }
     }
 
@@ -348,6 +582,7 @@ public class GameManager : MonoBehaviour
         // Switch screens
         startingScreen.Hide();
         gamerunScreen.Show();
+        healthBar.gameObject.SetActive(true);
 
         // Update state
         currentState = GameState.RUNNING;
@@ -357,6 +592,15 @@ public class GameManager : MonoBehaviour
         currentScore = 0f;
         lastBroadcastedDistance = -1f;
         lastBroadcastedScore = -1f;
+
+        // Reset enemy spawning
+        ResetEnemySpawning();
+        
+        // Reset player health
+        if (playerHealth != null)
+        {
+            playerHealth.ResetHealth();
+        }
 
         // Switch to gameplay music
         PlayGameplayMusic();
@@ -438,23 +682,15 @@ public class GameManager : MonoBehaviour
 
         Debug.Log("GameManager: Cat collided with " + collisionTag);
 
-        // Mark as dead
-        currentState = GameState.DEAD;
-
-        // Stop cat
-        catPlayer.maxSpeed = 0f;
-        catPlayer.rb.velocity = Vector2.zero;
-        catPlayer.rb.angularVelocity = 0f;
-
-        // Hide active screens
-        gamerunScreen.Hide();
-        pauseScreen.Hide();
-
-        await UniTask.Delay(1_000);
-
-        ShowGameOver();
-
-        Debug.Log("GameManager: Cat died, returning to start screen");
+        // Reduce health by 1 when hitting an obstacle
+        if (playerHealth != null)
+        {
+            playerHealth.TakeDamage(1);
+            Debug.Log("GameManager: Player took damage from " + collisionTag);
+        }
+        
+        // Note: Death is now handled by OnPlayerDied event when health reaches 0
+        // No need to manually set DEAD state or show game over here
     }
 
     void ShowGameOver()
@@ -464,6 +700,9 @@ public class GameManager : MonoBehaviour
 
         // Hiện màn hình
         gameOverScreen.Show();
+        
+        // Hide health bar
+        healthBar.gameObject.SetActive(false);
         
         // Switch back to menu music
         PlayMenuMusic();
@@ -481,6 +720,7 @@ public class GameManager : MonoBehaviour
         gamerunScreen.Hide();
         pauseScreen.Hide();
         gameOverScreen.Hide();
+        healthBar.gameObject.SetActive(false);
 
         // Reset cat position and state
         ResetCat();
@@ -493,6 +733,15 @@ public class GameManager : MonoBehaviour
 
         // Disable cat movement
         catPlayer.maxSpeed = 0f;
+
+        // Reset enemy spawning
+        ResetEnemySpawning();
+        
+        // Reset player health
+        if (playerHealth != null)
+        {
+            playerHealth.ResetHealth();
+        }
 
         // Switch back to menu music
         PlayMenuMusic();

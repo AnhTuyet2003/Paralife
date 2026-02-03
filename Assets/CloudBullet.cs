@@ -98,19 +98,12 @@ public class CloudBullet : MonoBehaviour
             Debug.Log("Hit Player! Dealing " + damage + " damage");
             SpawnExplosion();
             
-            // Damage player - uncomment when you have PlayerHealth script
-            // PlayerHealth playerHealth = collision.gameObject.GetComponent<PlayerHealth>();
-            // if (playerHealth != null)
-            // {
-            //     playerHealth.TakeDamage(damage);
-            // }
-            
-            // Alternative: Try CatMove component if you have health there
-            CatMove catMove = collision.gameObject.GetComponent<CatMove>();
-            if (catMove != null)
+            // Damage player
+            PlayerHealth playerHealth = collision.gameObject.GetComponent<PlayerHealth>();
+            if (playerHealth != null)
             {
-                Debug.Log("Player hit by cloud!");
-                // Add health reduction here when implemented
+                playerHealth.TakeDamage(damage);
+                Debug.Log("Cloud dealt " + damage + " damage to player");
             }
             
             Destroy(gameObject);

@@ -8,6 +8,7 @@ public class FireBallScript : MonoBehaviour
     private Rigidbody2D rb;
     public float force;
     private float timer;
+    public int damage = 1;
     
     [Header("Explosion Settings")]
     public GameObject explosionEffect;
@@ -49,8 +50,15 @@ public class FireBallScript : MonoBehaviour
             Debug.Log("Hit Player! Spawning explosion...");
             SpawnExplosion();
             PlayExplosionSound();
+            
             // Damage player
-            // collision.gameObject.GetComponent<PlayerHealth>().TakeDamage(1);
+            PlayerHealth playerHealth = collision.gameObject.GetComponent<PlayerHealth>();
+            if (playerHealth != null)
+            {
+                playerHealth.TakeDamage(damage);
+                Debug.Log("FireBall dealt " + damage + " damage to player");
+            }
+            
             Destroy(gameObject);
         }
         else if (collision.gameObject.CompareTag("Ground"))
