@@ -107,16 +107,31 @@ namespace Collectibles.PowerUps
             );
         }
 
-        private bool TryNegateCollision(string tag)
+        private bool TryNegateCollision(Collision2D collision)
         {
             if (remainingUsages <= 0)
                 return false; // No usages left, can't negate
+
+            string tag = collision.gameObject.tag;
 
             if (tag == "Hole" && playerRb != null)
             {
                 // Apply upward force to save from hole
                 playerRb.velocity =
                     new Vector2(playerRb.velocity.x, 0f) + levelData.holeRecoveryForce;
+            }
+            else if (tag == "Obstacle")
+            {
+                // Destroy the obstacle
+                if (collision.gameObject.TryGetComponent<Obstacle>(out var obstacle))
+                {
+                    obstacle.DestroyByProtection();
+                }
+                else
+                {
+                    // Fallback: destroy the game object directly
+                    Object.Destroy(collision.gameObject);
+                }
             }
 
             // Consume one usage

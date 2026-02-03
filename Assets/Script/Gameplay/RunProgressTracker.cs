@@ -8,6 +8,7 @@ namespace Gameplay
     /// <summary>
     /// Tracks distance traveled and score accumulated during a run.
     /// Subscribes to CoinCollector for score updates from coins.
+    /// Subscribes to Obstacle.OnAnyObstacleJumpedOver for obstacle score.
     /// </summary>
     public class RunProgressTracker : MonoBehaviour
     {
@@ -31,16 +32,20 @@ namespace Gameplay
         {
             if (coinCollector != null)
             {
-                coinCollector.OnCoinValueCollected += HandleCoinValueCollected;
+                coinCollector.OnCoinValueCollected += HandleScoreAdded;
             }
+
+            Obstacle.OnAnyObstacleJumpedOver += HandleScoreAdded;
         }
 
         private void OnDestroy()
         {
             if (coinCollector != null)
             {
-                coinCollector.OnCoinValueCollected -= HandleCoinValueCollected;
+                coinCollector.OnCoinValueCollected -= HandleScoreAdded;
             }
+
+            Obstacle.OnAnyObstacleJumpedOver -= HandleScoreAdded;
         }
 
         private void Update()
@@ -88,7 +93,7 @@ namespace Gameplay
             }
         }
 
-        private void HandleCoinValueCollected(int value)
+        private void HandleScoreAdded(int value)
         {
             CurrentScore += value;
             OnScoreChanged?.Invoke(CurrentScore);

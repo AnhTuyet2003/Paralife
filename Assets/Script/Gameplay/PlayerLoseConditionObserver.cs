@@ -21,9 +21,10 @@ namespace Gameplay
 
         /// <summary>
         /// Injected by effects (e.g., ProtectionCharm) to negate collisions at runtime.
+        /// Receives the full Collision2D to access the collided object.
         /// Return true to negate the collision.
         /// </summary>
-        public Func<string, bool> CollisionNegator;
+        public Func<Collision2D, bool> CollisionNegator;
 
         private void OnCollisionEnter2D(Collision2D collision)
         {
@@ -34,7 +35,7 @@ namespace Gameplay
                 return;
 
             // Check if any effect wants to negate this collision
-            if (CollisionNegator != null && CollisionNegator(tag))
+            if (CollisionNegator != null && CollisionNegator(collision))
                 return; // Negated, don't propagate
 
             // Broadcast the appropriate event
