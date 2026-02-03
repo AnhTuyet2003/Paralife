@@ -1,4 +1,5 @@
 #nullable enable
+using Gameplay;
 using UnityEngine;
 
 namespace Collectibles.PowerUps

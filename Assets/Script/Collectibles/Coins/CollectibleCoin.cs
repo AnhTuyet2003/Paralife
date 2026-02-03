@@ -1,7 +1,7 @@
 #nullable enable
 using UnityEngine;
 
-namespace Collectibles.PowerUps
+namespace Collectibles.Coins
 {
     /// <summary>
     /// Base coin collectible that can be attracted by Magnet

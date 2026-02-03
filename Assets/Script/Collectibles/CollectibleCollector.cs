@@ -1,7 +1,9 @@
 using System;
+using Collectibles.Coins;
+using Collectibles.PowerUps;
 using UnityEngine;
 
-namespace Collectibles.PowerUps
+namespace Collectibles
 {
     /// <summary>
     /// Attach to Player GameObject. Receives OnTriggerEnter2D events,

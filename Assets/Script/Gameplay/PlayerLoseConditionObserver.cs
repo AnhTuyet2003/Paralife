@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace Collectibles.PowerUps
+namespace Gameplay
 {
     /// <summary>
     /// Attach to Player GameObject. Receives OnCollisionEnter2D events,

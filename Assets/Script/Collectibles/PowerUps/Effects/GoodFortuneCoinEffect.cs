@@ -1,4 +1,5 @@
 #nullable enable
+using Collectibles.Coins;
 using UnityEngine;
 
 namespace Collectibles.PowerUps
