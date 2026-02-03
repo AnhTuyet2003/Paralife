@@ -152,11 +152,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   catPlayer: {fileID: 1137051841815712654}
+  loseConditionObserver: {fileID: 5622825916538787487}
+  runProgressTracker: {fileID: 0}
+  coinCollector: {fileID: 0}
   catSpawnPoint: {fileID: 2087016145}
   startingScreenPrefab: {fileID: 4905675459028775549, guid: e590f0583cd658d429ad217848985601, type: 3}
   gamerunScreenPrefab: {fileID: 4095861195396722339, guid: 77ae9a84cc5328246aaa98de66c4f03a, type: 3}
   pauseScreenPrefab: {fileID: 3833713067780576038, guid: 06b68462de3b4df4dbe99faa3e235f18, type: 3}
-  gameOverScreenPrefab: {fileID: 442215794761212199, guid: 6fb4f140ca3b1a44b9578356a1a36438, type: 3}
+  gameResultScreenPrefab: {fileID: -1824944695138800621, guid: d5d5fe40c96716542ac0d872f15595ed, type: 3}
 --- !u!4 &140516219
 Transform:
   m_ObjectHideFlags: 0
@@ -267,7 +270,7 @@ Transform:
   m_GameObject: {fileID: 290400404}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 9.094702, y: -11.199999, z: -10}
+  m_LocalPosition: {x: 10.92142, y: -11.199999, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -751,7 +754,7 @@ Transform:
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 9.094702, y: -11.199999, z: -10}
+  m_LocalPosition: {x: 10.92142, y: -11.199999, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -1823,7 +1826,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 6824199233492014116, guid: a73e0eb9aae7b8241a64941cd04fba64, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5622825916538787487}
   m_SourcePrefab: {fileID: 100100000, guid: a73e0eb9aae7b8241a64941cd04fba64, type: 3}
 --- !u!114 &1137051841815712654 stripped
 MonoBehaviour:
@@ -1856,6 +1862,18 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 5172778364096624780, guid: a73e0eb9aae7b8241a64941cd04fba64, type: 3}
   m_PrefabInstance: {fileID: 1137051841815712653}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &5622825916538787487
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1137051841815712657}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c0a043eaf0c0a534c80d180cb6a077b2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &6084094887868271327
 PrefabInstance:
   m_ObjectHideFlags: 0
