@@ -5174,7 +5174,7 @@ Transform:
   m_GameObject: {fileID: 290400404}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 9.971863, y: -5.5999994, z: -10}
+  m_LocalPosition: {x: 9.960656, y: -5.5999994, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -5479,6 +5479,11 @@ MonoBehaviour:
   jumpLevelParts:
   - {fileID: 2436319742243700382, guid: ac007336539c8394f953abb173dd0f1b, type: 3}
   - {fileID: 2436319742243700382, guid: 34616b507be856040bc20297dfa8195d, type: 3}
+  transitionLevelParts:
+  - {fileID: 853747053005391812, guid: 0a191c407b17b464991508db1778ef71, type: 3}
+  noObstacleLevelParts:
+  - {fileID: 853747053005391812, guid: 5442b011acf6ccd4ca0e052cb13b9ed4, type: 3}
+  - {fileID: 853747053005391812, guid: d5a066bc270767847a5837448c1fca30, type: 3}
   transitionDistance: 300
 --- !u!4 &480978106
 Transform:
@@ -5689,7 +5694,7 @@ Transform:
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 9.971863, y: -5.5999994, z: -10}
+  m_LocalPosition: {x: 9.960656, y: -5.5999994, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
