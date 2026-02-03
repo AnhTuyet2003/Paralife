@@ -424,16 +424,26 @@ public class GameManager : MonoBehaviour
         if (playerStamina == null)
         {
             playerStamina = catPlayer.gameObject.AddComponent<PlayerStamina>();
+            Debug.Log("GameManager: Created new PlayerStamina component");
+        }
+        else
+        {
+            Debug.Log("GameManager: Found existing PlayerStamina component");
         }
         
         // Subscribe to stamina events
         playerStamina.OnStaminaChanged += OnPlayerStaminaChanged;
         
-        Debug.Log("GameManager: Player stamina system initialized");
+        Debug.Log("GameManager: Player stamina system initialized - Max=" + playerStamina.GetMaxStamina() + 
+                  " Current=" + playerStamina.GetCurrentStamina());
     }
 
     void OnPlayerStaminaChanged(float currentStamina, float maxStamina)
     {
+        Debug.Log("GameManager: OnPlayerStaminaChanged called - " + currentStamina + "/" + maxStamina + 
+                  " | staminaBar=" + (staminaBar != null) + 
+                  " | staminaBarSlider=" + (staminaBarSlider != null));
+        
         // Update stamina bar (segment-based)
         if (staminaBar != null && staminaBarSlider == null)
         {

@@ -76,6 +76,7 @@ public class PlayerStamina : MonoBehaviour
         if (currentStamina != oldStamina)
         {
             OnStaminaChanged?.Invoke(currentStamina, maxStamina);
+            Debug.Log("PlayerStamina: REGEN +" + amount.ToString("F2") + " -> " + currentStamina.ToString("F1") + "/" + maxStamina);
         }
     }
     
@@ -87,19 +88,48 @@ public class PlayerStamina : MonoBehaviour
         if (currentStamina != oldStamina)
         {
             OnStaminaChanged?.Invoke(currentStamina, maxStamina);
+            Debug.Log("PlayerStamina: DRAIN -" + amount.ToString("F2") + " -> " + currentStamina.ToString("F1") + "/" + maxStamina);
         }
         
         // Stop flying if stamina depleted
         if (currentStamina <= 0f && catMove.isFlying)
         {
             OnStaminaDepleted?.Invoke();
-            Debug.Log("PlayerStamina: Stamina depleted - stopping flight");
+            Debug.LogWarning("PlayerStamina: DEPLETED - Stopping flight!");
         }
     }
     
     public bool CanFly()
     {
-        return currentStamina >= minStaminaToFly;
+        bool canFly = currentStamina >= minStaminaToFly;
+        if (!canFly)
+        {
+            Debug.LogWarning("PlayerStamina: Cannot fly - stamina too low (" + currentStamina + " < " + minStaminaToFly + ")");
+        }
+        return canFly;
+    }
+    
+    // Debug method to manually test stamina
+    void OnGUI()
+    {
+        if (Event.current.type == EventType.KeyDown)
+        {
+            if (Event.current.keyCode == KeyCode.Minus || Event.current.keyCode == KeyCode.KeypadMinus)
+            {
+                // Drain 10 stamina
+                currentStamina = Mathf.Max(0, currentStamina - 10f);
+                OnStaminaChanged?.Invoke(currentStamina, maxStamina);
+                Debug.Log("PlayerStamina: DEBUG - Drained 10 stamina manually");
+            }
+            
+            if (Event.current.keyCode == KeyCode.Plus || Event.current.keyCode == KeyCode.KeypadPlus || Event.current.keyCode == KeyCode.Equals)
+            {
+                // Add 10 stamina
+                currentStamina = Mathf.Min(maxStamina, currentStamina + 10f);
+                OnStaminaChanged?.Invoke(currentStamina, maxStamina);
+                Debug.Log("PlayerStamina: DEBUG - Added 10 stamina manually");
+            }
+        }
     }
     
     public void ResetStamina()

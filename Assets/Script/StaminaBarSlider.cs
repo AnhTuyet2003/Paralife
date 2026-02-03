@@ -39,17 +39,26 @@ public class StaminaBarSlider : MonoBehaviour
         if (staminaSlider == null)
         {
             staminaSlider = GetComponent<Slider>();
+            Debug.Log("StaminaBarSlider: Auto-found Slider component: " + (staminaSlider != null));
         }
         
         // Auto-find fill image if not assigned
         if (fillImage == null && staminaSlider != null)
         {
             fillImage = staminaSlider.fillRect?.GetComponent<Image>();
+            Debug.Log("StaminaBarSlider: Auto-found Fill Image: " + (fillImage != null));
         }
         
         if (staminaSlider == null)
         {
             Debug.LogError("StaminaBarSlider: No Slider component found!");
+        }
+        else
+        {
+            Debug.Log("StaminaBarSlider: Initialized - Slider Min=" + staminaSlider.minValue + 
+                      " Max=" + staminaSlider.maxValue + 
+                      " Value=" + staminaSlider.value +
+                      " Interactable=" + staminaSlider.interactable);
         }
     }
     
@@ -60,6 +69,11 @@ public class StaminaBarSlider : MonoBehaviour
             staminaSlider.minValue = 0f;
             staminaSlider.maxValue = maxStamina;
             staminaSlider.value = maxStamina;
+            Debug.Log("StaminaBarSlider: Initialize called - Set to " + maxStamina + "/" + maxStamina);
+        }
+        else
+        {
+            Debug.LogError("StaminaBarSlider: Initialize called but slider is NULL!");
         }
         
         UpdateColor(1f);
@@ -68,15 +82,22 @@ public class StaminaBarSlider : MonoBehaviour
     
     public void UpdateStamina(float currentStamina, float maxStamina)
     {
-        if (staminaSlider == null) return;
+        if (staminaSlider == null)
+        {
+            Debug.LogError("StaminaBarSlider: Slider is NULL!");
+            return;
+        }
         
+        float oldValue = staminaSlider.value;
         staminaSlider.maxValue = maxStamina;
         staminaSlider.value = currentStamina;
         
         float percentage = currentStamina / maxStamina;
         UpdateColor(percentage);
         
-        Debug.Log("StaminaBarSlider: Updated to " + currentStamina + "/" + maxStamina + " (" + (percentage * 100f) + "%)");
+        Debug.Log("StaminaBarSlider: Updated " + currentStamina.ToString("F1") + "/" + maxStamina + 
+                  " (" + (percentage * 100f).ToString("F1") + "%) | SliderValue=" + staminaSlider.value + 
+                  " | OldValue=" + oldValue);
     }
     
     void UpdateColor(float percentage)
