@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class LevelGenerator : MonoBehaviour
@@ -10,7 +11,7 @@ public class LevelGenerator : MonoBehaviour
 
     [Header("Settings")]
     [SerializeField] private Transform player;
-    [SerializeField] private float spawnDistance = 50f; 
+    [SerializeField] private float spawnDistance = 100f; 
     [SerializeField] private int initialChunks = 7;
 
     [Header("Probability")]
@@ -25,6 +26,9 @@ public class LevelGenerator : MonoBehaviour
     
     private Vector3 lastEndPosition;
     private bool lastPartWasJump = false; 
+    // Thêm vào trong class LevelGenerator
+    [Header("Transition Settings")]
+    [SerializeField] private float transitionDistance = 50f;
 
     void Start()
     {
@@ -49,37 +53,17 @@ public class LevelGenerator : MonoBehaviour
 
     void Update()
     {
-        // Chỉ chạy khi game đang RUNNING hoặc STARTING
         if (gameManager.GetCurrentState() != GameManager.GameState.RUNNING && 
             gameManager.GetCurrentState() != GameManager.GameState.STARTING) return;
 
+        // Chỉ giữ lại logic sinh địa hình cơ bản
         if (lastEndPosition.x - player.position.x < spawnDistance)
         {
             SpawnLevelPart();
         }
     }
 
-    public void ResetLevel()
-    {
-        Debug.Log("LevelGenerator: Đang dọn dẹp địa hình cũ...");
-
-        // 1. DỌN DẸP: Duyệt qua tất cả con của Container và xóa sổ
-        foreach (Transform child in environmentContainer)
-        {
-            Destroy(child.gameObject);
-        }
-
-        // 2. RESET VỊ TRÍ
-        lastEndPosition = levelStartPoint.position;
-        lastPartWasJump = false;
-
-        // 3. SINH LẠI TỪ ĐẦU
-        for (int i = 0; i < initialChunks; i++)
-        {
-            SpawnChunk(false); 
-        }
-    }
-
+    // Hàm SpawnLevelPart quay về trạng thái gốc của bạn
     private void SpawnLevelPart()
     {
         if (lastPartWasJump)
@@ -88,11 +72,28 @@ public class LevelGenerator : MonoBehaviour
         }
         else
         {
-            // Random xem có ra vực không
             if (Random.value < jumpChance) 
                 SpawnChunk(true); 
             else
                 SpawnChunk(false); 
+        }
+    }
+
+    public void ResetLevel()
+    {
+        Debug.Log("LevelGenerator: Đang dọn dẹp địa hình cũ...");
+
+        foreach (Transform child in environmentContainer)
+        {
+            Destroy(child.gameObject);
+        }
+
+        lastEndPosition = levelStartPoint.position;
+        lastPartWasJump = false;
+
+        for (int i = 0; i < initialChunks; i++)
+        {
+            SpawnChunk(false); 
         }
     }
 
