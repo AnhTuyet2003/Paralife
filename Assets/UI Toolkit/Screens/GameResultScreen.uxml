@@ -1,0 +1,35 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/PauseDialogStyle.uss?fileID=7433441132597879392&amp;guid=bf4d0213014b16348ba9316841af9598&amp;type=3#PauseDialogStyle" />
+    <Style src="project://database/Assets/UI%20Toolkit/Screens/GamerunResultScreenStyle.uss?fileID=7433441132597879392&amp;guid=1bb826f91b52c314497c3462c0f7f342&amp;type=3#GamerunResultScreenStyle" />
+    <ui:VisualElement name="GameResultDialogRoot" style="flex-grow: 1; justify-content: center;">
+        <ui:VisualElement name="GameResultDialog" class="dialogContainer" style="align-self: center; align-items: stretch; justify-content: center;">
+            <ui:Label tabindex="-1" text="GAME OVER" parse-escape-sequences="true" display-tooltip-when-elided="true" name="GameOverText" class="settingLabel" style="-unity-font-definition: url(&quot;project://database/Assets/UI%20Toolkit/Fonts/at01_SDF_2.asset?fileID=11400000&amp;guid=f826840a18328f14bbbedda043d89b3c&amp;type=2#at01_SDF_2&quot;); font-size: 40px; -unity-font-style: bold; margin-bottom: 16px;" />
+            <ui:VisualElement name="StatsStack" style="flex-grow: 0; margin-bottom: 12px;">
+                <ui:VisualElement name="ScoreStack" style="flex-grow: 0; flex-direction: row; align-self: center; align-items: center;">
+                    <ui:Label tabindex="-1" text="Score:" parse-escape-sequences="true" display-tooltip-when-elided="true" name="ScoreLabel" class="settingLabel resultLabel" style="margin-top: 0; margin-bottom: 0;" />
+                    <ui:Label tabindex="-1" text="0" parse-escape-sequences="true" display-tooltip-when-elided="true" name="Score" class="settingLabel resultLabel" style="-unity-font-style: bold; margin-top: 0; margin-bottom: 0;" />
+                    <ui:Label tabindex="-1" text="(Best: " parse-escape-sequences="true" display-tooltip-when-elided="true" name="BestScoreLabel" class="settingLabel resultLabel smallResultLabel" style="margin-top: 0; margin-bottom: 0;" />
+                    <ui:Label tabindex="-1" text="0" parse-escape-sequences="true" display-tooltip-when-elided="true" name="BestScore" class="settingLabel resultLabel smallResultLabel" style="-unity-font-style: bold; margin-top: 0; margin-bottom: 0;" />
+                    <ui:Label tabindex="-1" text=")" parse-escape-sequences="true" display-tooltip-when-elided="true" name="BestScoreLabelEnd" class="settingLabel resultLabel smallResultLabel" style="margin-top: 0; margin-bottom: 0;" />
+                </ui:VisualElement>
+                <ui:VisualElement name="DistanceStack" style="flex-grow: 0; flex-direction: row; align-self: center; align-items: center;">
+                    <ui:Label tabindex="-1" text="Distance:" parse-escape-sequences="true" display-tooltip-when-elided="true" name="DistanceLabel" class="settingLabel resultLabel" />
+                    <ui:Label tabindex="-1" text="0" parse-escape-sequences="true" display-tooltip-when-elided="true" name="Distance" class="settingLabel resultLabel" style="-unity-font-style: bold;" />
+                    <ui:Label tabindex="-1" text="(Best:" parse-escape-sequences="true" display-tooltip-when-elided="true" name="BestDistanceLabel" class="settingLabel resultLabel smallResultLabel" />
+                    <ui:Label tabindex="-1" text="0" parse-escape-sequences="true" display-tooltip-when-elided="true" name="BestDistance" class="settingLabel resultLabel smallResultLabel" style="-unity-font-style: bold;" />
+                    <ui:Label tabindex="-1" text=")" parse-escape-sequences="true" display-tooltip-when-elided="true" name="BestDistanceLabelEnd" class="settingLabel resultLabel smallResultLabel" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="OptionContainer" class="optionContainer" style="align-self: stretch; align-items: stretch;">
+                <ui:Button text="Button" parse-escape-sequences="true" display-tooltip-when-elided="true" name="HomeOption" class="optionButton">
+                    <ui:VisualElement name="OptionIcon" class="optionIcon" />
+                    <ui:Label tabindex="-1" text="Home" parse-escape-sequences="true" display-tooltip-when-elided="true" name="OptionName" class="optionName" />
+                </ui:Button>
+                <ui:Button text="Button" parse-escape-sequences="true" display-tooltip-when-elided="true" name="RestartOption" class="optionButton">
+                    <ui:VisualElement name="OptionIcon" class="optionIcon" style="background-image: url(&quot;project://database/Assets/UI%20Toolkit/Sprites/IconsShadow-64.png?fileID=1179677806&amp;guid=bf059ab01e3fec84f9fafd8d3cb5ba53&amp;type=3#IconsShadow-64_89&quot;);" />
+                    <ui:Label tabindex="-1" text="Restart" parse-escape-sequences="true" display-tooltip-when-elided="true" name="OptionName" class="optionName" />
+                </ui:Button>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

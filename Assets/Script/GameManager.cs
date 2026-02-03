@@ -1,3 +1,4 @@
+using Collectibles.Coins;
 using Cysharp.Threading.Tasks;
 using Gameplay;
 using UnityEngine;
@@ -44,6 +45,9 @@ public class GameManager : MonoBehaviour
     private RunProgressTracker runProgressTracker;
 
     [SerializeField]
+    private CoinCollector coinCollector;
+
+    [SerializeField]
     private Transform catSpawnPoint;
 
     [SerializeField]
@@ -56,9 +60,9 @@ public class GameManager : MonoBehaviour
     private PauseScreen pauseScreenPrefab;
 
     [SerializeField]
-    private GameOverScreen gameOverScreenPrefab;
+    private GameResultScreen gameResultScreenPrefab;
 
-    private GameOverScreen gameOverScreen;
+    private GameResultScreen gameResultScreen;
 
     private GameState currentState = GameState.STARTING;
 
@@ -110,13 +114,13 @@ public class GameManager : MonoBehaviour
         startingScreen = Instantiate(startingScreenPrefab);
         gamerunScreen = Instantiate(gamerunScreenPrefab);
         pauseScreen = Instantiate(pauseScreenPrefab);
-        gameOverScreen = Instantiate(gameOverScreenPrefab);
+        gameResultScreen = Instantiate(gameResultScreenPrefab);
 
         // Initialize screens with callbacks
         startingScreen.Initialize(OnStartButtonClicked);
-        gamerunScreen.Initialize(OnPauseButtonClicked, runProgressTracker);
+        gamerunScreen.Initialize(OnPauseButtonClicked, runProgressTracker, coinCollector);
         pauseScreen.Initialize(OnHomeButtonClicked, OnRestartButtonClicked, OnResumeButtonClicked);
-        gameOverScreen.Initialize(OnRestartButtonClicked, OnHomeButtonClicked);
+        gameResultScreen.Initialize(OnRestartButtonClicked, OnHomeButtonClicked);
 
         // Subscribe to lose condition events
         if (loseConditionObserver != null)
@@ -129,7 +133,7 @@ public class GameManager : MonoBehaviour
         startingScreen.Show();
         gamerunScreen.Hide();
         pauseScreen.Hide();
-        gameOverScreen.Hide();
+        gameResultScreen.Hide();
 
         Debug.Log("GameManager: Initialized successfully");
     }
@@ -169,7 +173,10 @@ public class GameManager : MonoBehaviour
         currentState = GameState.RUNNING;
 
         // Start tracking progress
-        runProgressTracker?.StartTracking(catSpawnPoint.position);
+        if (runProgressTracker != null)
+        {
+            runProgressTracker.StartTracking(catSpawnPoint.position);
+        }
 
         EventSystem.current.SetSelectedGameObject(null);
 
@@ -279,9 +286,10 @@ public class GameManager : MonoBehaviour
 
     void ShowGameOver()
     {
+        int finalScore = runProgressTracker != null ? runProgressTracker.CurrentScore : 0;
         int finalDistance = runProgressTracker != null ? runProgressTracker.CurrentDistance : 0;
-        gameOverScreen.SetScore(finalDistance);
-        gameOverScreen.Show();
+        gameResultScreen.SetResults(finalScore, finalDistance);
+        gameResultScreen.Show();
     }
 
     void ResetGame()
@@ -295,7 +303,7 @@ public class GameManager : MonoBehaviour
         startingScreen.Hide();
         gamerunScreen.Hide();
         pauseScreen.Hide();
-        gameOverScreen.Hide();
+        gameResultScreen.Hide();
 
         // Reset cat position and state
         ResetCat();
