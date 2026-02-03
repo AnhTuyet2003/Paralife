@@ -158,6 +158,8 @@ MonoBehaviour:
   pauseScreenPrefab: {fileID: 3833713067780576038, guid: 06b68462de3b4df4dbe99faa3e235f18, type: 3}
   gameOverScreenPrefab: {fileID: 442215794761212199, guid: 6fb4f140ca3b1a44b9578356a1a36438, type: 3}
   healthBarPrefab: {fileID: 5320372526663397429, guid: fb78655a82f26a143bddf259b673d355, type: 3}
+  staminaBarPrefab: {fileID: 3464914763219960995, guid: d25fe51666ec69e4bbda9570055313b2, type: 3}
+  uiCanvas: {fileID: 988927858}
   menuMusic: {fileID: 0}
   gameplayMusic: {fileID: 8300000, guid: a527684428343664d898392a7058d738, type: 3}
   musicVolume: 0.5
@@ -169,6 +171,8 @@ MonoBehaviour:
   gatorSpawnChance: 0.696
   gatorSpawnOffset: {x: -5, y: 5, z: 0}
   birdSpawnOffset: {x: 30, y: 5, z: 0}
+  healDistanceInterval: 250
+  healAmount: 0.25
 --- !u!4 &140516219
 Transform:
   m_ObjectHideFlags: 0
@@ -2050,6 +2054,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 6824199233492014116, guid: a73e0eb9aae7b8241a64941cd04fba64, type: 3}
       insertIndex: -1
       addedObject: {fileID: 5622825916538787490}
+    - targetCorrespondingSourceObject: {fileID: 6824199233492014116, guid: a73e0eb9aae7b8241a64941cd04fba64, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5622825916538787497}
   m_SourcePrefab: {fileID: 100100000, guid: a73e0eb9aae7b8241a64941cd04fba64, type: 3}
 --- !u!4 &5622825916538787482 stripped
 Transform:
@@ -2082,7 +2089,26 @@ MonoBehaviour:
   maxHealth: 3
   invincibilityDuration: 2
   damageSound: {fileID: 0}
+  healSound: {fileID: 0}
   damageSoundVolume: 1
+  healSoundVolume: 0.7
+--- !u!114 &5622825916538787497
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 590546164}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9183c4c72729dfc48889b2b34c4f2f8c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxStamina: 100
+  currentStamina: 100
+  staminaRegenRate: 10
+  staminaDrainRate: 15
+  minStaminaToFly: 10
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

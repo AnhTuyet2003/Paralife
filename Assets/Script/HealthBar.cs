@@ -8,9 +8,12 @@ public class HealthBar : MonoBehaviour
     
     [Header("Heart Sprites")]
     public Sprite fullHeart;
+    public Sprite threeQuarterHeart;
+    public Sprite halfHeart;
+    public Sprite quarterHeart;
     public Sprite emptyHeart;
     
-    public void UpdateHealth(int currentHealth, int maxHealth)
+    public void UpdateHealth(float currentHealth, int maxHealth)
     {
         // Update each heart image
         for (int i = 0; i < heartImages.Length; i++)
@@ -20,13 +23,32 @@ public class HealthBar : MonoBehaviour
                 // Show this heart
                 heartImages[i].enabled = true;
                 
-                // Full or empty?
-                if (i < currentHealth)
+                // Calculate how much of this heart should be filled
+                float heartValue = currentHealth - i;
+                
+                if (heartValue >= 1f)
                 {
+                    // Full heart
                     heartImages[i].sprite = fullHeart;
+                }
+                else if (heartValue >= 0.75f)
+                {
+                    // Three-quarter heart
+                    heartImages[i].sprite = threeQuarterHeart != null ? threeQuarterHeart : fullHeart;
+                }
+                else if (heartValue >= 0.5f)
+                {
+                    // Half heart
+                    heartImages[i].sprite = halfHeart != null ? halfHeart : fullHeart;
+                }
+                else if (heartValue >= 0.25f)
+                {
+                    // Quarter heart
+                    heartImages[i].sprite = quarterHeart != null ? quarterHeart : emptyHeart;
                 }
                 else
                 {
+                    // Empty heart
                     heartImages[i].sprite = emptyHeart;
                 }
             }

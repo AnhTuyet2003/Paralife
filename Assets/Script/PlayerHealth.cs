@@ -9,13 +9,16 @@ public class PlayerHealth : MonoBehaviour
     
     [Header("Sound Effects")]
     public AudioClip damageSound;
+    public AudioClip healSound;
     [Range(0f, 1f)]
     public float damageSoundVolume = 1.0f;
+    [Range(0f, 1f)]
+    public float healSoundVolume = 0.7f;
     
-    public event Action<int, int> OnHealthChanged; // current, max
+    public event Action<float, int> OnHealthChanged; // current (float), max (int)
     public event Action OnPlayerDied;
     
-    private int currentHealth;
+    private float currentHealth;
     private bool isInvincible = false;
     private float invincibilityTimer = 0f;
     private AudioSource audioSource;
@@ -73,7 +76,7 @@ public class PlayerHealth : MonoBehaviour
         }
     }
     
-    public void TakeDamage(int damage)
+    public void TakeDamage(float damage)
     {
         if (isInvincible || currentHealth <= 0)
         {
@@ -104,20 +107,29 @@ public class PlayerHealth : MonoBehaviour
         }
     }
     
-    public void Heal(int amount)
+    public void Heal(float amount)
     {
         if (currentHealth >= maxHealth)
         {
             return;
         }
         
+        float oldHealth = currentHealth;
         currentHealth += amount;
         currentHealth = Mathf.Min(currentHealth, maxHealth);
         
-        Debug.Log("PlayerHealth: Healed " + amount + " HP! Current HP: " + currentHealth + "/" + maxHealth);
+        float actualHealAmount = currentHealth - oldHealth;
         
-        // Broadcast health change
-        OnHealthChanged?.Invoke(currentHealth, maxHealth);
+        if (actualHealAmount > 0)
+        {
+            Debug.Log("PlayerHealth: Healed " + actualHealAmount + " HP! Current HP: " + currentHealth + "/" + maxHealth);
+            
+            // Play heal sound
+            PlayHealSound();
+            
+            // Broadcast health change
+            OnHealthChanged?.Invoke(currentHealth, maxHealth);
+        }
     }
     
     void Die()
@@ -142,6 +154,14 @@ public class PlayerHealth : MonoBehaviour
         }
     }
     
+    void PlayHealSound()
+    {
+        if (healSound != null && audioSource != null)
+        {
+            audioSource.PlayOneShot(healSound, healSoundVolume);
+        }
+    }
+    
     public void ResetHealth()
     {
         currentHealth = maxHealth;
@@ -160,7 +180,7 @@ public class PlayerHealth : MonoBehaviour
         Debug.Log("PlayerHealth: Reset to full health");
     }
     
-    public int GetCurrentHealth() => currentHealth;
+    public float GetCurrentHealth() => currentHealth;
     public int GetMaxHealth() => maxHealth;
     public bool IsInvincible() => isInvincible;
 }

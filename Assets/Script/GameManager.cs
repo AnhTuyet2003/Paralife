@@ -64,6 +64,9 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private HealthBar healthBarPrefab;
     
+    [SerializeField]
+    private GameObject staminaBarPrefab;
+    
     [Header("UI Canvas")]
     [SerializeField]
     [Tooltip("The Canvas that will contain the Health Bar UI")]
@@ -106,6 +109,13 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private Vector3 birdSpawnOffset = new Vector3(15f, 5f, 0f);
 
+    [Header("Health Regeneration")]
+    [SerializeField]
+    private float healDistanceInterval = 250f;
+    
+    [SerializeField]
+    private float healAmount = 0.25f;
+
     private GameOverScreen gameOverScreen;
     private GameState currentState = GameState.STARTING;
     private StartingScreen startingScreen;
@@ -113,6 +123,10 @@ public class GameManager : MonoBehaviour
     private PauseScreen pauseScreen;
     private HealthBar healthBar;
     private PlayerHealth playerHealth;
+    private GameObject staminaBarObject;
+    private StaminaBar staminaBar;
+    private StaminaBarSlider staminaBarSlider;
+    private PlayerStamina playerStamina;
     
     private float initialCatMaxSpeed;
     private Vector3 spawnPositionOffset;
@@ -127,6 +141,8 @@ public class GameManager : MonoBehaviour
     private float enemySpawnTimer = 0f;
     private bool firstEnemySpawned = false;
     private GameObject currentEnemy;
+    
+    private float lastHealDistance = 0f;
 
     #endregion
 
@@ -164,6 +180,9 @@ public class GameManager : MonoBehaviour
         
         // Setup player health
         SetupPlayerHealth();
+        
+        // Setup player stamina
+        SetupPlayerStamina();
 
         // Store initial cat max speed
         initialCatMaxSpeed = catPlayer.maxSpeed;
@@ -184,6 +203,14 @@ public class GameManager : MonoBehaviour
         // Instantiate health bar and parent it to Canvas
         healthBar = Instantiate(healthBarPrefab);
         
+        // Instantiate stamina bar and parent it to Canvas
+        if (staminaBarPrefab != null)
+        {
+            staminaBarObject = Instantiate(staminaBarPrefab);
+            staminaBar = staminaBarObject.GetComponent<StaminaBar>();
+            staminaBarSlider = staminaBarObject.GetComponent<StaminaBarSlider>();
+        }
+        
         // Use assigned Canvas or find one in scene
         Canvas canvas = uiCanvas;
         if (canvas == null)
@@ -197,16 +224,46 @@ public class GameManager : MonoBehaviour
         {
             healthBar.transform.SetParent(canvas.transform, false);
             Debug.Log("GameManager: HealthBar parented to Canvas: " + canvas.name);
+            
+            if (staminaBarObject != null)
+            {
+                staminaBarObject.transform.SetParent(canvas.transform, false);
+                Debug.Log("GameManager: StaminaBar parented to Canvas: " + canvas.name);
+            }
         }
         else
         {
-            Debug.LogError("GameManager: No Canvas found in scene! HealthBar will not be visible.");
+            Debug.LogError("GameManager: No Canvas found in scene! HealthBar and StaminaBar will not be visible.");
         }
 
         // Initialize health bar with player's max health
         if (healthBar != null && playerHealth != null)
         {
             healthBar.Initialize(playerHealth.GetMaxHealth());
+        }
+        
+        // Initialize stamina bar with player's max stamina
+        if (playerStamina != null)
+        {
+            if (staminaBar != null)
+            {
+                staminaBar.Initialize(playerStamina.GetMaxStamina());
+            }
+            
+            if (staminaBarSlider != null)
+            {
+                staminaBarSlider.Initialize(playerStamina.GetMaxStamina());
+            }
+        }
+        
+        // Check if using slider-based stamina bar instead
+        if (staminaBar != null)
+        {
+            staminaBarSlider = staminaBar.GetComponent<StaminaBarSlider>();
+            if (staminaBarSlider != null && playerStamina != null)
+            {
+                staminaBarSlider.Initialize(playerStamina.GetMaxStamina());
+            }
         }
 
         // Initialize screens with callbacks
@@ -224,6 +281,10 @@ public class GameManager : MonoBehaviour
         pauseScreen.Hide();
         gameOverScreen.Hide();
         healthBar.gameObject.SetActive(false);
+        if (staminaBarObject != null)
+        {
+            staminaBarObject.SetActive(false);
+        }
 
         Debug.Log("GameManager: Initialized successfully");
     }
@@ -249,6 +310,7 @@ public class GameManager : MonoBehaviour
         UpdateDistance();
         UpdateScore();
         UpdateEnemySpawning();
+        UpdateHealthRegeneration();
     }
 
     void OnDestroy()
@@ -264,6 +326,12 @@ public class GameManager : MonoBehaviour
         {
             playerHealth.OnHealthChanged -= OnPlayerHealthChanged;
             playerHealth.OnPlayerDied -= OnPlayerDied;
+        }
+        
+        // Unsubscribe from player stamina events
+        if (playerStamina != null)
+        {
+            playerStamina.OnStaminaChanged -= OnPlayerStaminaChanged;
         }
         
         // Stop music
@@ -301,7 +369,7 @@ public class GameManager : MonoBehaviour
         Debug.Log("GameManager: Player health system initialized");
     }
 
-    void OnPlayerHealthChanged(int currentHealth, int maxHealth)
+    void OnPlayerHealthChanged(float currentHealth, int maxHealth)
     {
         // Update health bar
         if (healthBar != null)
@@ -341,6 +409,44 @@ public class GameManager : MonoBehaviour
     {
         await UniTask.Delay(1_000);
         ShowGameOver();
+    }
+
+    #endregion
+
+    //---------------------------------------------------------------------------------------------
+
+    #region Player Stamina Methods
+
+    void SetupPlayerStamina()
+    {
+        // Add or get PlayerStamina component
+        playerStamina = catPlayer.GetComponent<PlayerStamina>();
+        if (playerStamina == null)
+        {
+            playerStamina = catPlayer.gameObject.AddComponent<PlayerStamina>();
+        }
+        
+        // Subscribe to stamina events
+        playerStamina.OnStaminaChanged += OnPlayerStaminaChanged;
+        
+        Debug.Log("GameManager: Player stamina system initialized");
+    }
+
+    void OnPlayerStaminaChanged(float currentStamina, float maxStamina)
+    {
+        // Update stamina bar (segment-based)
+        if (staminaBar != null && staminaBarSlider == null)
+        {
+            staminaBar.UpdateStamina(currentStamina, maxStamina);
+        }
+        
+        // Update stamina bar (slider-based)
+        if (staminaBarSlider != null)
+        {
+            staminaBarSlider.UpdateStamina(currentStamina, maxStamina);
+        }
+        
+        Debug.Log("GameManager: Player stamina changed to " + currentStamina + "/" + maxStamina);
     }
 
     #endregion
@@ -572,6 +678,26 @@ public class GameManager : MonoBehaviour
         // For now, score is updated via events (obstacles passed, etc.)
     }
 
+    void UpdateHealthRegeneration()
+    {
+        // Calculate current distance
+        float currentDist = catPlayer.transform.position.x - spawnPositionOffset.x;
+        
+        // Check if player has traveled another heal interval
+        if (currentDist >= lastHealDistance + healDistanceInterval)
+        {
+            // Heal the player
+            if (playerHealth != null)
+            {
+                playerHealth.Heal(healAmount);
+                Debug.Log("GameManager: Healing player " + healAmount + " HP at " + Mathf.FloorToInt(currentDist) + "m distance");
+            }
+            
+            // Update last heal distance to the next interval
+            lastHealDistance += healDistanceInterval;
+        }
+    }
+
     void OnStartButtonClicked()
     {
         Debug.Log("GameManager: Start button clicked");
@@ -583,6 +709,10 @@ public class GameManager : MonoBehaviour
         startingScreen.Hide();
         gamerunScreen.Show();
         healthBar.gameObject.SetActive(true);
+        if (staminaBarObject != null)
+        {
+            staminaBarObject.SetActive(true);
+        }
 
         // Update state
         currentState = GameState.RUNNING;
@@ -592,6 +722,7 @@ public class GameManager : MonoBehaviour
         currentScore = 0f;
         lastBroadcastedDistance = -1f;
         lastBroadcastedScore = -1f;
+        lastHealDistance = 0f;
 
         // Reset enemy spawning
         ResetEnemySpawning();
@@ -601,8 +732,14 @@ public class GameManager : MonoBehaviour
         {
             playerHealth.ResetHealth();
         }
+        
+        // Reset player stamina
+        if (playerStamina != null)
+        {
+            playerStamina.ResetStamina();
+        }
 
-        // Switch to gameplay music
+        // Switch back to menu music
         PlayGameplayMusic();
 
         EventSystem.current.SetSelectedGameObject(null);
@@ -695,14 +832,20 @@ public class GameManager : MonoBehaviour
 
     void ShowGameOver()
     {
-        // Cập nhật điểm số lên màn hình
+        // C?p nh?t di?m s? l�n m�n h�nh
         gameOverScreen.SetScore(Mathf.FloorToInt(currentDistance));
 
-        // Hiện màn hình
+        // Hi?n m�n h�nh
         gameOverScreen.Show();
         
         // Hide health bar
         healthBar.gameObject.SetActive(false);
+        
+        // Hide stamina bar
+        if (staminaBarObject != null)
+        {
+            staminaBarObject.SetActive(false);
+        }
         
         // Switch back to menu music
         PlayMenuMusic();
@@ -721,6 +864,10 @@ public class GameManager : MonoBehaviour
         pauseScreen.Hide();
         gameOverScreen.Hide();
         healthBar.gameObject.SetActive(false);
+        if (staminaBarObject != null)
+        {
+            staminaBarObject.SetActive(false);
+        }
 
         // Reset cat position and state
         ResetCat();
@@ -730,6 +877,7 @@ public class GameManager : MonoBehaviour
         currentScore = 0f;
         lastBroadcastedDistance = -1f;
         lastBroadcastedScore = -1f;
+        lastHealDistance = 0f;
 
         // Disable cat movement
         catPlayer.maxSpeed = 0f;
@@ -741,6 +889,12 @@ public class GameManager : MonoBehaviour
         if (playerHealth != null)
         {
             playerHealth.ResetHealth();
+        }
+        
+        // Reset player stamina
+        if (playerStamina != null)
+        {
+            playerStamina.ResetStamina();
         }
 
         // Switch back to menu music

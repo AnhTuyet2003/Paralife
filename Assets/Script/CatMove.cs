@@ -33,6 +33,7 @@ public class CatMove : MonoBehaviour
     public bool isFlying = false;
     public Animator animator;
     public Rigidbody2D rb;
+    public PlayerStamina playerStamina;
     
     private bool isGrounded = true;
     private float touchStartTime;
@@ -53,11 +54,18 @@ public class CatMove : MonoBehaviour
         Application.targetFrameRate = 30;
         animator = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
+        playerStamina = GetComponent<PlayerStamina>();
         
         if (rb == null)
         {
             Debug.LogError("No Rigidbody2D found! Adding one...");
             rb = gameObject.AddComponent<Rigidbody2D>();
+        }
+        
+        // Subscribe to stamina depletion event
+        if (playerStamina != null)
+        {
+            playerStamina.OnStaminaDepleted += OnStaminaDepleted;
         }
         
         rb.bodyType = RigidbodyType2D.Dynamic;
@@ -201,6 +209,13 @@ public class CatMove : MonoBehaviour
     public void ActivateFlying()
     {
         if (isFlying) return;
+        
+        // Check if player has enough stamina to fly
+        if (playerStamina != null && !playerStamina.CanFly())
+        {
+            Debug.Log("Not enough stamina to fly!");
+            return;
+        }
         
         isFlying = true;
         isJumping = false;
@@ -440,6 +455,15 @@ public class CatMove : MonoBehaviour
         {
             isGrounded = false;
             Debug.Log("Cat left the ground!");
+        }
+    }
+    
+    void OnStaminaDepleted()
+    {
+        // Stop flying when stamina runs out
+        if (isFlying)
+        {
+            DeactivateFlying();
         }
     }
 }

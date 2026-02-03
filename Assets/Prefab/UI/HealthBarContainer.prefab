@@ -131,6 +131,9 @@ MonoBehaviour:
   - {fileID: 7580435438347108801}
   - {fileID: 356187067310186361}
   fullHeart: {fileID: 21300000, guid: 711bdfa1566408742911b7f9730b8aa6, type: 3}
+  threeQuarterHeart: {fileID: 21300000, guid: 7d85bbd25da8fb749892bd55ad8a5c4c, type: 3}
+  halfHeart: {fileID: 21300000, guid: 98d9e5678a6ca954984d9f554934ca62, type: 3}
+  quarterHeart: {fileID: 21300000, guid: 7ed4915508be26c4ca313eec92797149, type: 3}
   emptyHeart: {fileID: 21300000, guid: f700a359eb5eb2a48b5d5c7c0e41a931, type: 3}
 --- !u!1 &5969132217031513273
 GameObject:
