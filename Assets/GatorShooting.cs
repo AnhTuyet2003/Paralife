@@ -23,6 +23,7 @@ public class GatorShooting : MonoBehaviour
     {
         player = GameObject.FindGameObjectWithTag("Player");
         startPosition = transform.position;
+        startPosition.x = player.transform.position.x + 15f;
     }
 
     void Update()
