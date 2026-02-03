@@ -17,7 +17,11 @@ namespace Collectibles.Coins
 
         public int TotalCoinsCollected => totalCoinsCollected;
 
+        /// <summary>Fired with the total coins collected after each collection.</summary>
         public event Action<int>? OnCoinAmountChanged;
+
+        /// <summary>Fired with the value of each coin when collected.</summary>
+        public event Action<int>? OnCoinValueCollected;
 
         private void Start()
         {
@@ -39,6 +43,7 @@ namespace Collectibles.Coins
         {
             int value = coin.Collect();
             totalCoinsCollected += value;
+            OnCoinValueCollected?.Invoke(value);
             OnCoinAmountChanged?.Invoke(totalCoinsCollected);
         }
 

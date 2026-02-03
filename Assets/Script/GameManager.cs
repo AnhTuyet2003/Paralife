@@ -1,4 +1,5 @@
 using Cysharp.Threading.Tasks;
+using Gameplay;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -20,23 +21,6 @@ public class GameManager : MonoBehaviour
     /// <summary>Gets the current game state.</summary>
     public GameState GetCurrentState() => currentState;
 
-    /// <summary>Gets the current distance traveled.</summary>
-    public float GetCurrentDistance() => currentDistance;
-
-    /// <summary>Gets the current score.</summary>
-    public float GetCurrentScore() => currentScore;
-
-    /// <summary>Adds points to the score and broadcasts the change.</summary>
-    public void AddScore(float points)
-    {
-        currentScore += points;
-        if (Mathf.Abs(currentScore - lastBroadcastedScore) > 0.01f)
-        {
-            lastBroadcastedScore = currentScore;
-            gamerunScreen.SetScoreValue(Mathf.FloorToInt(currentScore));
-        }
-    }
-
     /// <summary>Auto-starts the game after restart (called by GameInitiator).</summary>
     public void AutoStartGame()
     {
@@ -52,6 +36,12 @@ public class GameManager : MonoBehaviour
 
     [SerializeField]
     private CatMove catPlayer;
+
+    [SerializeField]
+    private PlayerLoseConditionObserver loseConditionObserver;
+
+    [SerializeField]
+    private RunProgressTracker runProgressTracker;
 
     [SerializeField]
     private Transform catSpawnPoint;
@@ -77,11 +67,6 @@ public class GameManager : MonoBehaviour
     private PauseScreen pauseScreen;
 
     private float initialCatMaxSpeed;
-    private Vector3 spawnPositionOffset;
-    private float currentDistance = 0f;
-    private float currentScore = 0f;
-    private float lastBroadcastedDistance = -1f;
-    private float lastBroadcastedScore = -1f;
 
     #endregion
 
@@ -121,9 +106,6 @@ public class GameManager : MonoBehaviour
         catPlayer.transform.SetPositionAndRotation(catSpawnPoint.position, catSpawnPoint.rotation);
         catPlayer.maxSpeed = 0f;
 
-        // Store spawn position for distance calculation
-        spawnPositionOffset = catPlayer.transform.position;
-
         // Instantiate screen prefabs
         startingScreen = Instantiate(startingScreenPrefab);
         gamerunScreen = Instantiate(gamerunScreenPrefab);
@@ -132,12 +114,16 @@ public class GameManager : MonoBehaviour
 
         // Initialize screens with callbacks
         startingScreen.Initialize(OnStartButtonClicked);
-        gamerunScreen.Initialize(OnPauseButtonClicked);
+        gamerunScreen.Initialize(OnPauseButtonClicked, runProgressTracker);
         pauseScreen.Initialize(OnHomeButtonClicked, OnRestartButtonClicked, OnResumeButtonClicked);
         gameOverScreen.Initialize(OnRestartButtonClicked, OnHomeButtonClicked);
 
-        // Subscribe to cat collision events
-        catPlayer.OnObstacleHit += OnCatCollided;
+        // Subscribe to lose condition events
+        if (loseConditionObserver != null)
+        {
+            loseConditionObserver.OnObstacleHit += OnLoseCondition;
+            loseConditionObserver.OnHoleFall += OnHoleFall;
+        }
 
         // Show only starting screen
         startingScreen.Show();
@@ -150,29 +136,15 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        // Additional setup if needed
         currentState = GameState.STARTING;
-        currentDistance = 0f;
-        currentScore = 0f;
-    }
-
-    void Update()
-    {
-        if (currentState != GameState.RUNNING)
-        {
-            return;
-        }
-
-        UpdateDistance();
-        UpdateScore();
     }
 
     void OnDestroy()
     {
-        // Unsubscribe from cat collision events
-        if (catPlayer != null)
+        if (loseConditionObserver != null)
         {
-            catPlayer.OnObstacleHit -= OnCatCollided;
+            loseConditionObserver.OnObstacleHit -= OnLoseCondition;
+            loseConditionObserver.OnHoleFall -= OnHoleFall;
         }
     }
 
@@ -181,27 +153,6 @@ public class GameManager : MonoBehaviour
     //---------------------------------------------------------------------------------------------
 
     #region Private Methods
-
-    void UpdateDistance()
-    {
-        float newDistance = Mathf.Max(0f, catPlayer.transform.position.x - spawnPositionOffset.x);
-        int flooredDistance = Mathf.FloorToInt(newDistance);
-
-        if (flooredDistance != Mathf.FloorToInt(lastBroadcastedDistance))
-        {
-            currentDistance = flooredDistance;
-            lastBroadcastedDistance = flooredDistance;
-
-            // Update the screen display
-            gamerunScreen.SetDistanceValue(Mathf.FloorToInt(currentDistance));
-        }
-    }
-
-    void UpdateScore()
-    {
-        // Score update logic placeholder - can be expanded later
-        // For now, score is updated via events (obstacles passed, etc.)
-    }
 
     void OnStartButtonClicked()
     {
@@ -217,11 +168,8 @@ public class GameManager : MonoBehaviour
         // Update state
         currentState = GameState.RUNNING;
 
-        // Reset tracking
-        currentDistance = 0f;
-        currentScore = 0f;
-        lastBroadcastedDistance = -1f;
-        lastBroadcastedScore = -1f;
+        // Start tracking progress
+        runProgressTracker?.StartTracking(catSpawnPoint.position);
 
         EventSystem.current.SetSelectedGameObject(null);
 
@@ -290,17 +238,23 @@ public class GameManager : MonoBehaviour
         Debug.Log("GameManager: Returned to home screen");
     }
 
-    // Method called when cat collides with obstacle/hole
-    private async void OnCatCollided(string collisionTag)
+    private void OnLoseCondition(string collisionTag)
+    {
+        HandlePlayerDeath($"obstacle ({collisionTag})");
+    }
+
+    private void OnHoleFall()
+    {
+        HandlePlayerDeath("hole");
+    }
+
+    private async void HandlePlayerDeath(string cause)
     {
         if (currentState == GameState.DEAD)
-        {
-            return; // Already dead
-        }
+            return;
 
-        Debug.Log("GameManager: Cat collided with " + collisionTag);
+        Debug.Log($"GameManager: Player died from {cause}");
 
-        // Mark as dead
         currentState = GameState.DEAD;
 
         // Stop cat
@@ -308,23 +262,25 @@ public class GameManager : MonoBehaviour
         catPlayer.rb.velocity = Vector2.zero;
         catPlayer.rb.angularVelocity = 0f;
 
+        // Stop tracking
+        if (runProgressTracker != null)
+        {
+            runProgressTracker.StopTracking();
+        }
+
         // Hide active screens
         gamerunScreen.Hide();
         pauseScreen.Hide();
 
-        await UniTask.Delay(1_000); // Wait for 3 seconds before resetting
+        await UniTask.Delay(1_000);
 
         ShowGameOver();
-
-        Debug.Log("GameManager: Cat died, returning to start screen");
     }
 
     void ShowGameOver()
     {
-        // Cập nhật điểm số lên màn hình
-        gameOverScreen.SetScore(Mathf.FloorToInt(currentDistance));
-
-        // Hiện màn hình
+        int finalDistance = runProgressTracker != null ? runProgressTracker.CurrentDistance : 0;
+        gameOverScreen.SetScore(finalDistance);
         gameOverScreen.Show();
     }
 
@@ -344,11 +300,11 @@ public class GameManager : MonoBehaviour
         // Reset cat position and state
         ResetCat();
 
-        // Reset tracking
-        currentDistance = 0f;
-        currentScore = 0f;
-        lastBroadcastedDistance = -1f;
-        lastBroadcastedScore = -1f;
+        // Reset progress tracker
+        if (runProgressTracker != null)
+        {
+            runProgressTracker.Reset();
+        }
 
         // Disable cat movement
         catPlayer.maxSpeed = 0f;
