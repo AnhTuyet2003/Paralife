@@ -7,6 +7,7 @@ TagManager:
   - Obstacle
   - Ground
   - Hole
+  - Collectible
   layers:
   - Default
   - TransparentFX
@@ -14,7 +15,7 @@ TagManager:
   - 
   - Water
   - UI
-  - 
+  - Collectibles
   - 
   - 
   - 
@@ -70,4 +71,7 @@ TagManager:
     locked: 0
   - name: Player
     uniqueID: 2914527251
+    locked: 0
+  - name: Collectibles
+    uniqueID: 1666668959
     locked: 0

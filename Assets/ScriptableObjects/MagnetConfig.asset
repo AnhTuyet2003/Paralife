@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f35bc142b2dedfb4798b9469d8316025, type: 3}
+  m_Name: MagnetConfig
+  m_EditorClassIdentifier: 
+  powerUpType: 1
+  displayName: 
+  description: 
+  icon: {fileID: 21300000, guid: e293b584c4b255b4fa999bbe6186e73c, type: 3}
+  pickupPrefab: {fileID: 4628327127076278668, guid: d3a67d316feaaf84c8bd559c93514633, type: 3}
+  levels:
+  - duration: 10
+    attractionRadius: 10
+    attractionSpeed: 10
+  attractableTags:
+  - Collectible
+  auraVisualPrefab: {fileID: 9139506573946526288, guid: 0448fd8cb0200cf429a5485fc50c4b5a, type: 3}
+  auraBaseRadius: 1

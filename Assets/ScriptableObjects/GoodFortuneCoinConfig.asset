@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a9e526eabbea2c43abdbf026917405d, type: 3}
+  m_Name: GoodFortuneCoinConfig
+  m_EditorClassIdentifier: 
+  powerUpType: 3
+  displayName: 
+  description: 
+  icon: {fileID: 21300000, guid: 30230cd001d818042959ecaf1954e959, type: 3}
+  pickupPrefab: {fileID: 3460718643551791786, guid: 29e19a7f6229b75498d032b3e79f1f44, type: 3}
+  levels:
+  - duration: 12
+    conversionRadius: 10
+    normalMultiplier: 2
+    specialMultiplier: 3
+    specialChance: 0.25
+    normalCoinPrefab: {fileID: 483092905106065643, guid: 2ed032de98c3ef44eb1928cde1bf816b, type: 3}
+    specialCoinPrefab: {fileID: 1094587876225498843, guid: ae5df2f22b409fd4ca214702b1abae1d, type: 3}
+    normalConversionEffect: {fileID: 0}
+    specialConversionEffect: {fileID: 0}
+  auraVisualPrefab: {fileID: 9139506573946526288, guid: e32b79766b56662448ccd14a32ef9a85, type: 3}
+  auraBaseRadius: 1
