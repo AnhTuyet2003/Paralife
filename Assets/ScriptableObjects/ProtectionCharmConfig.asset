@@ -19,7 +19,7 @@ MonoBehaviour:
   pickupPrefab: {fileID: 3799478425164336795, guid: a6df0a38f5ab53e4db84f3fc9776d0c8, type: 3}
   levels:
   - duration: 60
-    usageCount: 5
+    usageCount: 1
     holeRecoveryForce: {x: 20, y: 36}
   auraVisualPrefab: {fileID: 9139506573946526288, guid: e859ea1aef9da3b49bb516f92de2313c, type: 3}
   auraLocalScale: 5

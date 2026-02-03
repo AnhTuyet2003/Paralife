@@ -20,7 +20,7 @@ MonoBehaviour:
   levels:
   - duration: 10
     attractionRadius: 15
-    attractionSpeed: 20
+    attractionSpeed: 30
   attractableTags:
   - Collectible
   auraVisualPrefab: {fileID: 9139506573946526288, guid: 0448fd8cb0200cf429a5485fc50c4b5a, type: 3}
