@@ -124,8 +124,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   force: 50
   explosionEffect: {fileID: 1220875598742322055, guid: 14b34649d60c4da429c335d2b67a5e4e, type: 3}
-  explosionDuration: 5
+  explosionDuration: 2
   explosionScale: 10
+  explosionSound: {fileID: 8300000, guid: 4fd03e6950d27d54daced53f81e706ff, type: 3}
+  explosionVolume: 1
 --- !u!50 &7865171343564893149
 Rigidbody2D:
   serializedVersion: 4

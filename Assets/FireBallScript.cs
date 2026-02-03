@@ -14,6 +14,11 @@ public class FireBallScript : MonoBehaviour
     public float explosionDuration = 1.0f;
     public float explosionScale = 10.0f;
     
+    [Header("Sound Effects")]
+    public AudioClip explosionSound;
+    [Range(0f, 1f)]
+    public float explosionVolume = 1.0f;
+    
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -43,6 +48,7 @@ public class FireBallScript : MonoBehaviour
         {
             Debug.Log("Hit Player! Spawning explosion...");
             SpawnExplosion();
+            PlayExplosionSound();
             // Damage player
             // collision.gameObject.GetComponent<PlayerHealth>().TakeDamage(1);
             Destroy(gameObject);
@@ -51,7 +57,21 @@ public class FireBallScript : MonoBehaviour
         {
             Debug.Log("Hit Ground! Spawning explosion...");
             SpawnExplosion();
+            PlayExplosionSound();
             Destroy(gameObject);
+        }
+    }
+    
+    private void PlayExplosionSound()
+    {
+        if (explosionSound != null)
+        {
+            AudioSource.PlayClipAtPoint(explosionSound, transform.position, explosionVolume);
+            Debug.Log("Playing explosion sound at position: " + transform.position);
+        }
+        else
+        {
+            Debug.LogWarning("Explosion sound not assigned!");
         }
     }
     

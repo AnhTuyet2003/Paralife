@@ -61,6 +61,20 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private GameOverScreen gameOverScreenPrefab;
 
+    [Header("Background Music")]
+    [SerializeField]
+    private AudioClip menuMusic;
+    
+    [SerializeField]
+    private AudioClip gameplayMusic;
+    
+    [Range(0f, 1f)]
+    [SerializeField]
+    private float musicVolume = 0.5f;
+    
+    [SerializeField]
+    private float musicFadeDuration = 1.0f;
+
     private GameOverScreen gameOverScreen;
 
     private GameState currentState = GameState.STARTING;
@@ -75,6 +89,9 @@ public class GameManager : MonoBehaviour
     private float currentScore = 0f;
     private float lastBroadcastedDistance = -1f;
     private float lastBroadcastedScore = -1f;
+    
+    private AudioSource musicAudioSource;
+    private bool isFadingMusic = false;
 
     #endregion
 
@@ -106,6 +123,9 @@ public class GameManager : MonoBehaviour
             Debug.LogError("GameManager: One or more screen prefabs are not assigned!");
             return;
         }
+
+        // Setup background music
+        SetupBackgroundMusic();
 
         // Store initial cat max speed
         initialCatMaxSpeed = catPlayer.maxSpeed;
@@ -147,6 +167,9 @@ public class GameManager : MonoBehaviour
         currentState = GameState.STARTING;
         currentDistance = 0f;
         currentScore = 0f;
+        
+        // Start playing menu music
+        PlayMenuMusic();
     }
 
     void Update()
@@ -167,6 +190,125 @@ public class GameManager : MonoBehaviour
         {
             catPlayer.OnObstacleHit -= OnCatCollided;
         }
+        
+        // Stop music
+        if (musicAudioSource != null)
+        {
+            musicAudioSource.Stop();
+        }
+    }
+
+    #endregion
+
+    //---------------------------------------------------------------------------------------------
+
+    #region Background Music Methods
+
+    void SetupBackgroundMusic()
+    {
+        // Create a persistent AudioSource for background music
+        musicAudioSource = gameObject.AddComponent<AudioSource>();
+        musicAudioSource.playOnAwake = false;
+        musicAudioSource.loop = true;
+        musicAudioSource.volume = 0f; // Start at 0 for fade in
+        
+        Debug.Log("GameManager: Background music system initialized");
+    }
+
+    void PlayMenuMusic()
+    {
+        if (menuMusic != null && musicAudioSource != null)
+        {
+            if (musicAudioSource.clip != menuMusic)
+            {
+                CrossfadeToMusic(menuMusic);
+            }
+            else if (!musicAudioSource.isPlaying)
+            {
+                musicAudioSource.Play();
+                StartCoroutine(FadeInMusic());
+            }
+            Debug.Log("GameManager: Playing menu music");
+        }
+        else if (menuMusic == null)
+        {
+            Debug.LogWarning("GameManager: Menu music not assigned!");
+        }
+    }
+
+    void PlayGameplayMusic()
+    {
+        if (gameplayMusic != null && musicAudioSource != null)
+        {
+            if (musicAudioSource.clip != gameplayMusic)
+            {
+                CrossfadeToMusic(gameplayMusic);
+            }
+            Debug.Log("GameManager: Playing gameplay music");
+        }
+        else if (gameplayMusic == null)
+        {
+            Debug.LogWarning("GameManager: Gameplay music not assigned!");
+        }
+    }
+
+    void CrossfadeToMusic(AudioClip newClip)
+    {
+        if (!isFadingMusic)
+        {
+            StartCoroutine(CrossfadeMusicCoroutine(newClip));
+        }
+    }
+
+    System.Collections.IEnumerator CrossfadeMusicCoroutine(AudioClip newClip)
+    {
+        isFadingMusic = true;
+        
+        // Fade out current music
+        if (musicAudioSource.isPlaying)
+        {
+            float startVolume = musicAudioSource.volume;
+            float elapsed = 0f;
+            
+            while (elapsed < musicFadeDuration)
+            {
+                elapsed += Time.unscaledDeltaTime; // Use unscaled for pause compatibility
+                musicAudioSource.volume = Mathf.Lerp(startVolume, 0f, elapsed / musicFadeDuration);
+                yield return null;
+            }
+            
+            musicAudioSource.Stop();
+        }
+        
+        // Switch to new clip
+        musicAudioSource.clip = newClip;
+        musicAudioSource.Play();
+        
+        // Fade in new music
+        float elapsed2 = 0f;
+        while (elapsed2 < musicFadeDuration)
+        {
+            elapsed2 += Time.unscaledDeltaTime;
+            musicAudioSource.volume = Mathf.Lerp(0f, musicVolume, elapsed2 / musicFadeDuration);
+            yield return null;
+        }
+        
+        musicAudioSource.volume = musicVolume;
+        isFadingMusic = false;
+    }
+
+    System.Collections.IEnumerator FadeInMusic()
+    {
+        float elapsed = 0f;
+        
+        while (elapsed < musicFadeDuration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            musicAudioSource.volume = Mathf.Lerp(0f, musicVolume, elapsed / musicFadeDuration);
+            yield return null;
+        }
+        
+        musicAudioSource.volume = musicVolume;
     }
 
     #endregion
@@ -215,6 +357,9 @@ public class GameManager : MonoBehaviour
         currentScore = 0f;
         lastBroadcastedDistance = -1f;
         lastBroadcastedScore = -1f;
+
+        // Switch to gameplay music
+        PlayGameplayMusic();
 
         EventSystem.current.SetSelectedGameObject(null);
 
@@ -305,7 +450,7 @@ public class GameManager : MonoBehaviour
         gamerunScreen.Hide();
         pauseScreen.Hide();
 
-        await UniTask.Delay(1_000); // Wait for 3 seconds before resetting
+        await UniTask.Delay(1_000);
 
         ShowGameOver();
 
@@ -319,6 +464,9 @@ public class GameManager : MonoBehaviour
 
         // Hiện màn hình
         gameOverScreen.Show();
+        
+        // Switch back to menu music
+        PlayMenuMusic();
     }
 
     void ResetGame()
@@ -345,6 +493,9 @@ public class GameManager : MonoBehaviour
 
         // Disable cat movement
         catPlayer.maxSpeed = 0f;
+
+        // Switch back to menu music
+        PlayMenuMusic();
 
         // Trigger scene reload through GameInitiator
         OnGameReset?.Invoke();
