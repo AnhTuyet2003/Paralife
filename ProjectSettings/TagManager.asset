@@ -7,6 +7,7 @@ TagManager:
   - Obstacle
   - Ground
   - Hole
+  - HealthBar
   - Background
   layers:
   - Default
@@ -74,4 +75,7 @@ TagManager:
     locked: 0
   - name: Player
     uniqueID: 2914527251
+    locked: 0
+  - name: Bullet
+    uniqueID: 845839847
     locked: 0
