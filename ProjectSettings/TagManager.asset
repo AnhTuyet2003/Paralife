@@ -8,6 +8,7 @@ TagManager:
   - Ground
   - Hole
   - Collectible
+  - Background
   layers:
   - Default
   - TransparentFX
@@ -71,6 +72,8 @@ TagManager:
     locked: 0
   - name: Collectibles
     uniqueID: 1666668959
+  - name: Foreground
+    uniqueID: 2739809883
     locked: 0
   - name: Player
     uniqueID: 2914527251

@@ -91,6 +91,9 @@ public class GameInitiator : MonoBehaviour
         var loadingOperation = SceneManager.LoadSceneAsync(gameSceneName, LoadSceneMode.Additive);
         await loadingOperation;
 
+        // Wait a frame to ensure all Awake() methods complete
+        await UniTask.Yield();
+
         // Find GameManager in the loaded scene
         _gameManager = FindObjectOfType<GameManager>();
 
@@ -98,6 +101,9 @@ public class GameInitiator : MonoBehaviour
         {
             _gameManager.OnGameReset += OnGameManagerReset;
             Debug.Log("GameInitiator: Subscribed to GameManager.OnGameReset event");
+            
+            // Auto-start the game after restart
+            _gameManager.AutoStartGame();
         }
         else
         {

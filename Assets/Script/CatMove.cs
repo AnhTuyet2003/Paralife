@@ -148,6 +148,8 @@ public class CatMove : MonoBehaviour
     {
         if (animator != null)
         {
+            animator.SetFloat("yVelocity", rb.velocity.y);
+            animator.SetBool("Grounded", isGrounded);
             animator.SetBool("IsJumping", isJumping);
             animator.SetBool("IsRunning", isRunning);
             animator.SetBool("IsBackflipping", isBackflipping);
