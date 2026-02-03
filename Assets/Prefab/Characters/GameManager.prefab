@@ -1,0 +1,68 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2268621296804840441
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6855578988171983354}
+  - component: {fileID: 3332017926829884691}
+  m_Layer: 0
+  m_Name: GameManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6855578988171983354
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2268621296804840441}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3332017926829884691
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2268621296804840441}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b6be18ebae7ac04da93e2ab749397a4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  catPlayer: {fileID: 0}
+  catSpawnPoint: {fileID: 0}
+  startingScreenPrefab: {fileID: 4905675459028775549, guid: e590f0583cd658d429ad217848985601, type: 3}
+  gamerunScreenPrefab: {fileID: 4095861195396722339, guid: 77ae9a84cc5328246aaa98de66c4f03a, type: 3}
+  pauseScreenPrefab: {fileID: 3833713067780576038, guid: 06b68462de3b4df4dbe99faa3e235f18, type: 3}
+  gameOverScreenPrefab: {fileID: 442215794761212199, guid: 6fb4f140ca3b1a44b9578356a1a36438, type: 3}
+  healthBarPrefab: {fileID: 5320372526663397429, guid: fb78655a82f26a143bddf259b673d355, type: 3}
+  staminaBarPrefab: {fileID: 3464914763219960995, guid: d25fe51666ec69e4bbda9570055313b2, type: 3}
+  uiCanvas: {fileID: 0}
+  menuMusic: {fileID: 0}
+  gameplayMusic: {fileID: 8300000, guid: a527684428343664d898392a7058d738, type: 3}
+  musicVolume: 0.5
+  musicFadeDuration: 5
+  gatorPrefab: {fileID: 4728042700154031828, guid: 4bfe953d62403e3438ec19d0dae5543c, type: 3}
+  birdPrefab: {fileID: 3197322853826163886, guid: 1b0581a2fa8393746a49a8623173bf64, type: 3}
+  enemySpawnInterval: 30
+  firstEnemySpawnDelay: 15
+  gatorSpawnChance: 0.696
+  gatorSpawnOffset: {x: -5, y: 5, z: 0}
+  birdSpawnOffset: {x: 30, y: 5, z: 0}
+  healDistanceInterval: 250
+  healAmount: 0.25

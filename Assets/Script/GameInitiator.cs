@@ -89,9 +89,6 @@ public class GameInitiator : MonoBehaviour
         {
             _gameManager.OnGameReset += OnGameManagerReset;
             Debug.Log("GameInitiator: Subscribed to GameManager.OnGameReset event");
-            
-            // Auto-start the game after restart
-            _gameManager.AutoStartGame();
         }
         else
         {
