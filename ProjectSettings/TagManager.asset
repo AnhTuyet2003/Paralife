@@ -69,9 +69,9 @@ TagManager:
   - name: Grass
     uniqueID: 417896645
     locked: 0
-  - name: Player
-    uniqueID: 2914527251
-    locked: 0
   - name: Collectibles
     uniqueID: 1666668959
+    locked: 0
+  - name: Player
+    uniqueID: 2914527251
     locked: 0

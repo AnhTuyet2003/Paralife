@@ -19,8 +19,8 @@ MonoBehaviour:
   pickupPrefab: {fileID: 4628327127076278668, guid: d3a67d316feaaf84c8bd559c93514633, type: 3}
   levels:
   - duration: 10
-    attractionRadius: 10
-    attractionSpeed: 10
+    attractionRadius: 15
+    attractionSpeed: 20
   attractableTags:
   - Collectible
   auraVisualPrefab: {fileID: 9139506573946526288, guid: 0448fd8cb0200cf429a5485fc50c4b5a, type: 3}
