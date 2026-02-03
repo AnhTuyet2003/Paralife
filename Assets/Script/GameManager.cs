@@ -37,6 +37,13 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    /// <summary>Auto-starts the game after restart (called by GameInitiator).</summary>
+    public void AutoStartGame()
+    {
+        Debug.Log("GameManager: Auto-starting game after restart");
+        OnStartButtonClicked();
+    }
+
     #endregion
 
     //---------------------------------------------------------------------------------------------

@@ -99,7 +99,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 92b8fa8db7fa1114fbf11a793d27dc4b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cam: {fileID: 0}
   parallaxEffect: 0.6
 --- !u!1 &2278535214030839708
 GameObject:
@@ -126,7 +125,7 @@ Transform:
   m_GameObject: {fileID: 2278535214030839708}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 788.8578, y: -9.270987, z: -0.09489755}
+  m_LocalPosition: {x: 788.8578, y: -9.270987, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -402,7 +401,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 92b8fa8db7fa1114fbf11a793d27dc4b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cam: {fileID: 0}
   parallaxEffect: 0
 --- !u!1 &6178098224517191861
 GameObject:
@@ -671,7 +669,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 92b8fa8db7fa1114fbf11a793d27dc4b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cam: {fileID: 0}
   parallaxEffect: 0.8
 --- !u!1 &7874094432852234642
 GameObject:
