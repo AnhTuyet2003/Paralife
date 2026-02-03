@@ -13,27 +13,37 @@ namespace Collectibles.PowerUps
 
         private readonly MagnetConfigSO.LevelData levelData;
         private readonly string[] attractableTags;
-        private readonly GameObject? magnetVisualPrefab;
-        private GameObject? magnetVisualInstance;
+        private readonly GameObject? auraVisualPrefab;
+        private readonly float auraBaseRadius;
+        private GameObject? auraVisualInstance;
 
         public MagnetEffect(
             MagnetConfigSO.LevelData levelData,
             string[] attractableTags,
-            GameObject? magnetVisualPrefab
+            GameObject? auraVisualPrefab,
+            float auraBaseRadius = 1f
         )
         {
             this.levelData = levelData;
             this.attractableTags = attractableTags;
-            this.magnetVisualPrefab = magnetVisualPrefab;
+            this.auraVisualPrefab = auraVisualPrefab;
+            this.auraBaseRadius = auraBaseRadius;
         }
 
         public override void Apply(CatMove player)
         {
             base.Apply(player);
 
-            if (magnetVisualPrefab != null)
+            if (auraVisualPrefab != null)
             {
-                magnetVisualInstance = Object.Instantiate(magnetVisualPrefab, player.transform);
+                auraVisualInstance = Object.Instantiate(auraVisualPrefab, player.transform);
+                float desiredScale = levelData.attractionRadius / auraBaseRadius;
+                Vector3 parentScale = player.transform.lossyScale;
+                auraVisualInstance.transform.localScale = new Vector3(
+                    parentScale.x != 0 ? desiredScale / parentScale.x : desiredScale,
+                    parentScale.y != 0 ? desiredScale / parentScale.y : desiredScale,
+                    parentScale.z != 0 ? desiredScale / parentScale.z : desiredScale
+                );
             }
 
             Debug.Log(
@@ -45,10 +55,10 @@ namespace Collectibles.PowerUps
         {
             base.Cancel();
 
-            if (magnetVisualInstance != null)
+            if (auraVisualInstance != null)
             {
-                Object.Destroy(magnetVisualInstance);
-                magnetVisualInstance = null;
+                Object.Destroy(auraVisualInstance);
+                auraVisualInstance = null;
             }
         }
 

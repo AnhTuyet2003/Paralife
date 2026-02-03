@@ -18,23 +18,28 @@ namespace Collectibles.PowerUps
         public override bool HasDuration => !levelData.HasInfiniteDuration;
 
         private readonly ProtectionCharmConfigSO.LevelData levelData;
-        private readonly GameObject? shieldVisualPrefab;
+        private int remainingUsages;
+
+        private readonly GameObject? auraVisualPrefab;
+        private readonly float auraLocalScale;
+        private GameObject? auraVisualInstance;
 
         // Stored during Apply for Cancel/TryNegateCollision
         private PlayerLoseConditionObserver? loseObserver;
         private Rigidbody2D? playerRb;
         private Transform? playerTransform;
-        private GameObject? shieldVisualInstance;
-        private int remainingUsages;
 
         public ProtectionCharmEffect(
             ProtectionCharmConfigSO.LevelData levelData,
-            GameObject? shieldVisualPrefab
+            GameObject? auraVisualPrefab,
+            float auraLocalScale = 1.25f
         )
         {
             this.levelData = levelData;
-            this.shieldVisualPrefab = shieldVisualPrefab;
             this.remainingUsages = levelData.usageCount;
+
+            this.auraVisualPrefab = auraVisualPrefab;
+            this.auraLocalScale = auraLocalScale;
         }
 
         public override void Apply(CatMove player)
@@ -54,9 +59,15 @@ namespace Collectibles.PowerUps
             }
 
             // Show shield visual
-            if (shieldVisualPrefab != null)
+            if (auraVisualPrefab != null)
             {
-                shieldVisualInstance = Object.Instantiate(shieldVisualPrefab, playerTransform);
+                auraVisualInstance = Object.Instantiate(auraVisualPrefab, playerTransform);
+
+                // Get player's world scale and adjust aura local scale proportionally
+                Vector3 playerWorldScale = playerTransform.lossyScale;
+                float scaleFactor = 1f / playerWorldScale.x; // or average of all axes if non-uniform
+                auraVisualInstance.transform.localScale =
+                    Vector3.one * (auraLocalScale * scaleFactor);
             }
 
             Debug.Log(
@@ -75,10 +86,10 @@ namespace Collectibles.PowerUps
             }
 
             // Destroy shield visual
-            if (shieldVisualInstance != null)
+            if (auraVisualInstance != null)
             {
-                Object.Destroy(shieldVisualInstance);
-                shieldVisualInstance = null;
+                Object.Destroy(auraVisualInstance);
+                auraVisualInstance = null;
             }
 
             // Clear references
@@ -103,7 +114,8 @@ namespace Collectibles.PowerUps
             if (tag == "Hole" && playerRb != null)
             {
                 // Apply upward force to save from hole
-                playerRb.velocity = new Vector2(playerRb.velocity.x, levelData.holeRecoveryForce);
+                playerRb.velocity =
+                    new Vector2(playerRb.velocity.x, 0f) + levelData.holeRecoveryForce;
             }
 
             // Consume one usage

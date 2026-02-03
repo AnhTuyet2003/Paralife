@@ -22,7 +22,7 @@ namespace Collectibles.PowerUps
             public int usageCount;
 
             [Tooltip("Upward force applied when saving from hole")]
-            public float holeRecoveryForce;
+            public Vector2 holeRecoveryForce;
 
             /// <summary>
             /// True if this level has infinite duration (only expires by usage depletion)
@@ -35,7 +35,10 @@ namespace Collectibles.PowerUps
         private LevelData[] levels = Array.Empty<LevelData>();
 
         [Header("Visuals")]
-        public GameObject? shieldVisualPrefab;
+        [Tooltip("Visual effect prefab shown on player while effect is active (aura)")]
+        public GameObject? auraVisualPrefab;
+
+        public float auraLocalScale = 1.25f;
 
         private void OnEnable()
         {
@@ -59,7 +62,7 @@ namespace Collectibles.PowerUps
 
         public override IPowerUpEffect CreateEffect(int level)
         {
-            return new ProtectionCharmEffect(GetLevelData(level), shieldVisualPrefab);
+            return new ProtectionCharmEffect(GetLevelData(level), auraVisualPrefab, auraLocalScale);
         }
     }
 }

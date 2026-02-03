@@ -12,15 +12,37 @@ namespace Collectibles.PowerUps
         public override bool HasDuration => true;
 
         private readonly GoodFortuneCoinConfigSO.LevelData levelData;
+        private readonly GameObject? auraVisualPrefab;
+        private readonly float auraBaseRadius;
+        private GameObject? auraVisualInstance;
 
-        public GoodFortuneCoinEffect(GoodFortuneCoinConfigSO.LevelData levelData)
+        public GoodFortuneCoinEffect(
+            GoodFortuneCoinConfigSO.LevelData levelData,
+            GameObject? auraVisualPrefab,
+            float auraBaseRadius = 1f
+        )
         {
             this.levelData = levelData;
+            this.auraVisualPrefab = auraVisualPrefab;
+            this.auraBaseRadius = auraBaseRadius;
         }
 
         public override void Apply(CatMove player)
         {
             base.Apply(player);
+
+            if (auraVisualPrefab != null)
+            {
+                auraVisualInstance = Object.Instantiate(auraVisualPrefab, player.transform);
+                float desiredScale = levelData.conversionRadius / auraBaseRadius;
+                Vector3 parentScale = player.transform.lossyScale;
+                auraVisualInstance.transform.localScale = new Vector3(
+                    parentScale.x != 0 ? desiredScale / parentScale.x : desiredScale,
+                    parentScale.y != 0 ? desiredScale / parentScale.y : desiredScale,
+                    parentScale.z != 0 ? desiredScale / parentScale.z : desiredScale
+                );
+            }
+
             ConvertNearbyCoins(player.transform.position);
         }
 
@@ -31,6 +53,17 @@ namespace Collectibles.PowerUps
 
             // Continuously convert any new coins that enter range
             ConvertNearbyCoins(player.transform.position);
+        }
+
+        public override void Cancel()
+        {
+            base.Cancel();
+
+            if (auraVisualInstance != null)
+            {
+                Object.Destroy(auraVisualInstance);
+                auraVisualInstance = null;
+            }
         }
 
         private void ConvertNearbyCoins(Vector3 position)
@@ -63,9 +96,9 @@ namespace Collectibles.PowerUps
                 ? levelData.specialMultiplier
                 : levelData.normalMultiplier;
 
-            Sprite? sprite = isSpecialConversion
-                ? levelData.specialConversionSprite
-                : levelData.normalConversionSprite;
+            GameObject? coinPrefab = isSpecialConversion
+                ? levelData.specialCoinPrefab
+                : levelData.normalCoinPrefab;
 
             GameObject? effectPrefab = isSpecialConversion
                 ? levelData.specialConversionEffect
@@ -73,7 +106,7 @@ namespace Collectibles.PowerUps
 
             // Apply conversion
             coin.SetMultiplier(multiplier);
-            coin.ConvertToSpecial(sprite, effectPrefab);
+            coin.ConvertToSpecial(coinPrefab, effectPrefab);
 
             Debug.Log(
                 $"[GoodFortuneCoin] Converted coin with x{multiplier} multiplier{(isSpecialConversion ? " (special!)" : "")}"

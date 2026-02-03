@@ -24,8 +24,11 @@ namespace Collectibles.PowerUps
         public string[] attractableTags = { "Coin", "Collectible" };
 
         [Header("Visuals")]
-        [Tooltip("Visual effect prefab shown on player while magnet is active")]
-        public GameObject? magnetVisualPrefab;
+        [Tooltip("Visual effect prefab shown on player while effect is active (aura)")]
+        public GameObject? auraVisualPrefab;
+
+        [Tooltip("The radius the aura prefab was designed for (used for scaling)")]
+        public float auraBaseRadius = 1f;
 
         private void OnEnable()
         {
@@ -45,7 +48,12 @@ namespace Collectibles.PowerUps
 
         public override IPowerUpEffect CreateEffect(int level)
         {
-            return new MagnetEffect(GetLevelData(level), attractableTags, magnetVisualPrefab);
+            return new MagnetEffect(
+                GetLevelData(level),
+                attractableTags,
+                auraVisualPrefab,
+                auraBaseRadius
+            );
         }
     }
 }

@@ -30,22 +30,29 @@ namespace Collectibles.PowerUps
             public float specialChance;
 
             [Header("Visuals (Optional)")]
-            [Tooltip("Sprite for normal converted coins (optional)")]
-            public Sprite? normalConversionSprite;
+            [Tooltip("Prefab to replace normal converted coins (can be animated)")]
+            public GameObject? normalCoinPrefab;
 
-            [Tooltip("Sprite for special converted coins (optional)")]
-            public Sprite? specialConversionSprite;
+            [Tooltip("Prefab to replace special converted coins (can be animated)")]
+            public GameObject? specialCoinPrefab;
 
-            [Tooltip("Effect prefab for normal converted coins (optional)")]
+            [Tooltip("Effect prefab for normal conversion (particles, etc.)")]
             public GameObject? normalConversionEffect;
 
-            [Tooltip("Effect prefab for special converted coins (optional)")]
+            [Tooltip("Effect prefab for special conversion (particles, etc.)")]
             public GameObject? specialConversionEffect;
         }
 
         [Header("Good Fortune Coin Settings")]
         [SerializeField]
         private LevelData[] levels = Array.Empty<LevelData>();
+
+        [Header("Visuals")]
+        [Tooltip("Visual effect prefab shown on player while effect is active (aura)")]
+        public GameObject? auraVisualPrefab;
+
+        [Tooltip("The radius the aura prefab was designed for (used for scaling)")]
+        public float auraBaseRadius = 1f;
 
         private void OnEnable()
         {
@@ -65,7 +72,7 @@ namespace Collectibles.PowerUps
 
         public override IPowerUpEffect CreateEffect(int level)
         {
-            return new GoodFortuneCoinEffect(GetLevelData(level));
+            return new GoodFortuneCoinEffect(GetLevelData(level), auraVisualPrefab, auraBaseRadius);
         }
     }
 }

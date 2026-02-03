@@ -41,18 +41,30 @@ namespace Collectibles.PowerUps
         /// <summary>
         /// Convert this coin to a special coin with optional visual effects.
         /// </summary>
-        /// <param name="sprite">Optional sprite to change to (null = keep current)</param>
+        /// <param name="coinPrefab">Optional prefab to copy visuals from (null = keep current)</param>
         /// <param name="effectPrefab">Optional effect prefab to spawn (null = no effect)</param>
-        public void ConvertToSpecial(Sprite? sprite = null, GameObject? effectPrefab = null)
+        public void ConvertToSpecial(GameObject? coinPrefab = null, GameObject? effectPrefab = null)
         {
             if (isSpecial)
                 return;
             isSpecial = true;
 
-            // Visual change (only if sprite provided)
-            if (sprite != null && spriteRenderer != null)
+            // Copy visuals from prefab (supports animated sprites)
+            if (coinPrefab != null && spriteRenderer != null)
             {
-                spriteRenderer.sprite = sprite;
+                if (coinPrefab.TryGetComponent<SpriteRenderer>(out var prefabRenderer))
+                {
+                    spriteRenderer.sprite = prefabRenderer.sprite;
+                    spriteRenderer.color = prefabRenderer.color;
+                }
+
+                // Copy animator if present (for animated coins)
+                if (coinPrefab.TryGetComponent<Animator>(out var prefabAnimator))
+                {
+                    if (!TryGetComponent<Animator>(out var animator))
+                        animator = gameObject.AddComponent<Animator>();
+                    animator.runtimeAnimatorController = prefabAnimator.runtimeAnimatorController;
+                }
             }
 
             // Spawn effect overlay (only if prefab provided)
