@@ -1,7 +1,10 @@
 using UnityEngine;
+using System;
 
 public class CatMove : MonoBehaviour
 {
+    // Event dispatched when cat collides with obstacle/hole
+    public event Action<string> OnObstacleHit;
     public float rightwardForce = 50f;
     public float maxSpeed = 15f;
     public float jumpForce = 12f;
@@ -22,8 +25,8 @@ public class CatMove : MonoBehaviour
     public bool isBackflipFailed = false;
     public bool isSpeedBoosted = false;
     public Animator animator;
+    public Rigidbody2D rb;
     
-    private Rigidbody2D rb;
     private bool isGrounded = true;
     private float touchStartTime;
     private bool isTouching = false;
@@ -38,7 +41,7 @@ public class CatMove : MonoBehaviour
     void Start()
     {
         QualitySettings.vSyncCount = 0;
-        Application.targetFrameRate = 60;
+        Application.targetFrameRate = 30;
         animator = GetComponent<Animator>();
         rb = GetComponent<Rigidbody2D>();
         
@@ -145,6 +148,8 @@ public class CatMove : MonoBehaviour
     {
         if (animator != null)
         {
+            animator.SetFloat("yVelocity", rb.velocity.y);
+            animator.SetBool("Grounded", isGrounded);
             animator.SetBool("IsJumping", isJumping);
             animator.SetBool("IsRunning", isRunning);
             animator.SetBool("IsBackflipping", isBackflipping);
@@ -285,6 +290,14 @@ public class CatMove : MonoBehaviour
     void OnCollisionEnter2D(Collision2D collision)
     {
         Debug.Log("Collision detected with: " + collision.gameObject.name + ", Tag: " + collision.gameObject.tag + ", Layer: " + LayerMask.LayerToName(collision.gameObject.layer));
+        
+        // Check for obstacle or hole collision first
+        if (collision.gameObject.CompareTag("Obstacle") || collision.gameObject.CompareTag("Hole"))
+        {
+            Debug.Log("Cat collided with " + collision.gameObject.tag);
+            OnObstacleHit?.Invoke(collision.gameObject.tag);
+            return;
+        }
         
         if (collision.gameObject.CompareTag("Ground") || collision.gameObject.layer == LayerMask.NameToLayer("Ground"))
         {

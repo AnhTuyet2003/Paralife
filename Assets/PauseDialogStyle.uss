@@ -1,0 +1,68 @@
+.dialogContainer {
+    width: 50%;
+    height: 75%;
+    align-self: center;
+    align-items: stretch;
+    justify-content: space-around;
+    background-image: url("project://database/Assets/UI%20Toolkit/Sprites/DialogFrame.png?fileID=2800000&guid=6b61fd81db380704aba0ddac674a3abd&type=3#DialogFrame");
+    -unity-slice-left: 9;
+    -unity-slice-top: 9;
+    -unity-slice-right: 9;
+    -unity-slice-bottom: 9;
+    -unity-slice-scale: 2px;
+}
+
+.settingLabel {
+    -unity-font-definition: url("project://database/Assets/UI%20Toolkit/Fonts/at01_SDF_2.asset?fileID=11400000&guid=f826840a18328f14bbbedda043d89b3c&type=2#at01_SDF_2");
+    font-size: 36px;
+    -unity-text-align: upper-center;
+}
+
+.optionContainer {
+}
+
+.optionButton {
+    background-color: rgba(1, 1, 1, 0);
+    -unity-font-definition: initial;
+    flex-direction: row;
+    align-items: flex-start;
+    align-self: stretch;
+    margin-top: 0%;
+    margin-right: 10%;
+    margin-bottom: 2%;
+    margin-left: 10%;
+    padding-top: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+    border-top-width: 0;
+    border-right-width: 0;
+    border-bottom-width: 0;
+    border-left-width: 0;
+    background-image: url("project://database/Assets/UI%20Toolkit/Sprites/DialogButton.png?fileID=2800000&guid=9dccba2c408e31f419e11435666c56d5&type=3#DialogButton");
+    -unity-slice-left: 9;
+    -unity-slice-top: 9;
+    -unity-slice-right: 9;
+    -unity-slice-bottom: 9;
+}
+
+.optionButton:hover {
+    -unity-background-image-tint-color: rgb(240, 180, 100);
+}
+
+.optionButton > .optionIcon {
+    -unity-font-definition: initial;
+    width: 28px;
+    height: 28px;
+    background-image: url("project://database/Assets/UI%20Toolkit/Sprites/IconsShadow-64.png?fileID=-1709963455&guid=bf059ab01e3fec84f9fafd8d3cb5ba53&type=3#IconsShadow-64_94");
+    margin-right: 5px;
+    padding-bottom: 1px;
+    -unity-background-image-tint-color: rgb(200, 159, 100);
+    margin-left: 5px;
+}
+
+.optionButton > .optionName {
+    -unity-font-definition: url("project://database/Assets/UI%20Toolkit/Fonts/at01_SDF_2.asset?fileID=11400000&guid=f826840a18328f14bbbedda043d89b3c&type=2#at01_SDF_2");
+    font-size: 24px;
+    color: rgb(1, 1, 1);
+}

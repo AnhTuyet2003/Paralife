@@ -5,6 +5,9 @@ TagManager:
   serializedVersion: 2
   tags:
   - Obstacle
+  - Ground
+  - Hole
+  - Background
   layers:
   - Default
   - TransparentFX
@@ -65,6 +68,9 @@ TagManager:
     locked: 0
   - name: Grass
     uniqueID: 417896645
+    locked: 0
+  - name: Foreground
+    uniqueID: 2739809883
     locked: 0
   - name: Player
     uniqueID: 2914527251

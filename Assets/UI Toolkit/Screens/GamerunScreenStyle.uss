@@ -1,0 +1,34 @@
+.meter {
+    -unity-font-definition: url("project://database/Assets/UI%20Toolkit/Fonts/at01_SDF_2.asset?fileID=11400000&guid=f826840a18328f14bbbedda043d89b3c&type=2#at01_SDF_2");
+    font-size: 48px;
+    -unity-font-style: bold;
+}
+
+.score {
+    -unity-font-definition: url("project://database/Assets/UI%20Toolkit/Fonts/at01_SDF_2.asset?fileID=11400000&guid=f826840a18328f14bbbedda043d89b3c&type=2#at01_SDF_2");
+    font-size: 36px;
+}
+
+.pauseButton {
+    align-items: stretch;
+    margin-bottom: 2%;
+    margin-left: 2%;
+    background-image: url("project://database/Assets/UI%20Toolkit/Sprites/IconsShadow-64.png?fileID=145886958&guid=bf059ab01e3fec84f9fafd8d3cb5ba53&type=3#IconsShadow-64_88");
+    -unity-font-definition: initial;
+    -unity-background-scale-mode: stretch-to-fill;
+    align-self: flex-start;
+    margin-top: 2%;
+    margin-right: 2%;
+    background-color: rgba(1, 1, 1, 0);
+    width: auto;
+    height: auto;
+    flex-grow: 0;
+    padding-top: 15px;
+    padding-right: 15px;
+    padding-bottom: 15px;
+    padding-left: 15px;
+    border-top-width: 0;
+    border-right-width: 0;
+    border-bottom-width: 0;
+    border-left-width: 0;
+}
