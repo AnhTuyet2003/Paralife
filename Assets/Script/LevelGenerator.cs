@@ -23,12 +23,15 @@ public class LevelGenerator : MonoBehaviour
     
     [SerializeField] private List<Transform> safeLevelParts; 
     [SerializeField] private List<Transform> jumpLevelParts; 
+    [SerializeField] private List<Transform> transitionLevelParts; 
+    [SerializeField] private List<Transform> noObstacleLevelParts;
     
     private Vector3 lastEndPosition;
     private bool lastPartWasJump = false; 
     // Thêm vào trong class LevelGenerator
     [Header("Transition Settings")]
     [SerializeField] private float transitionDistance = 50f;
+    private int chunksSpawned = 0;
 
     void Start()
     {
@@ -63,25 +66,24 @@ public class LevelGenerator : MonoBehaviour
         }
     }
 
-    // Hàm SpawnLevelPart quay về trạng thái gốc của bạn
     private void SpawnLevelPart()
     {
-        if (lastPartWasJump)
+        if (chunksSpawned < 3)
         {
             SpawnChunk(false); 
         }
         else
         {
-            if (Random.value < jumpChance) 
-                SpawnChunk(true); 
+            if (lastPartWasJump)
+                SpawnChunk(false);
             else
-                SpawnChunk(false); 
+                SpawnChunk(Random.value < jumpChance);
         }
     }
 
     public void ResetLevel()
     {
-        Debug.Log("LevelGenerator: Đang dọn dẹp địa hình cũ...");
+        chunksSpawned = 0;
 
         foreach (Transform child in environmentContainer)
         {
@@ -101,7 +103,16 @@ public class LevelGenerator : MonoBehaviour
     {
         Transform chosenLevelPart;
 
-        if (isJump)
+        if(chunksSpawned == 0)
+        {
+            chosenLevelPart = transitionLevelParts[Random.Range(0, transitionLevelParts.Count)];
+            lastPartWasJump = false; 
+        } else if(chunksSpawned < 3 && chunksSpawned > 0)
+        {
+            chosenLevelPart = noObstacleLevelParts[Random.Range(0, noObstacleLevelParts.Count)];
+            lastPartWasJump = false;
+        }
+         else if (isJump)
         {
             chosenLevelPart = jumpLevelParts[Random.Range(0, jumpLevelParts.Count)];
             lastPartWasJump = true; 
@@ -112,7 +123,8 @@ public class LevelGenerator : MonoBehaviour
             lastPartWasJump = false; 
         }
 
-        // QUAN TRỌNG: Spawn làm con của environmentContainer
+        chunksSpawned++;
+
         Transform lastLevelPartTransform = Instantiate(chosenLevelPart, lastEndPosition, Quaternion.identity, environmentContainer);
 
         lastEndPosition = lastLevelPartTransform.Find("EndPosition").position;
