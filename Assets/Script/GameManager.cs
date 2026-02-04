@@ -1,3 +1,4 @@
+using Audio;
 using Collectibles.Coins;
 using Cysharp.Threading.Tasks;
 using Gameplay;
@@ -27,6 +28,25 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log("GameManager: Auto-starting game after restart");
         OnStartButtonClicked();
+    }
+
+    /// <summary>Shows the settings screen (can be called from UI).</summary>
+    public void ShowSettings()
+    {
+        if (settingScreen == null)
+            return;
+
+        // Hide current screen
+        if (currentState == GameState.STARTING)
+        {
+            startingScreen.Hide();
+        }
+        else if (currentState == GameState.PAUSED)
+        {
+            pauseScreen.Hide();
+        }
+
+        settingScreen.Show();
     }
 
     #endregion
@@ -62,7 +82,14 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     private GameResultScreen gameResultScreenPrefab;
 
+    [SerializeField]
+    private SettingScreen settingScreenPrefab;
+
+    [SerializeField]
+    private AudioPlayer audioPlayer;
+
     private GameResultScreen gameResultScreen;
+    private SettingScreen settingScreen;
 
     private GameState currentState = GameState.STARTING;
 
@@ -115,12 +142,20 @@ public class GameManager : MonoBehaviour
         gamerunScreen = Instantiate(gamerunScreenPrefab);
         pauseScreen = Instantiate(pauseScreenPrefab);
         gameResultScreen = Instantiate(gameResultScreenPrefab);
+        if (settingScreenPrefab != null)
+        {
+            settingScreen = Instantiate(settingScreenPrefab);
+        }
 
         // Initialize screens with callbacks
-        startingScreen.Initialize(OnStartButtonClicked);
+        startingScreen.Initialize(OnStartButtonClicked, ShowSettings);
         gamerunScreen.Initialize(OnPauseButtonClicked, runProgressTracker, coinCollector);
         pauseScreen.Initialize(OnHomeButtonClicked, OnRestartButtonClicked, OnResumeButtonClicked);
         gameResultScreen.Initialize(OnRestartButtonClicked, OnHomeButtonClicked);
+        if (settingScreen != null)
+        {
+            settingScreen.Initialize(OnSettingReturnClicked, audioPlayer);
+        }
 
         // Subscribe to lose condition events
         if (loseConditionObserver != null)
@@ -134,6 +169,13 @@ public class GameManager : MonoBehaviour
         gamerunScreen.Hide();
         pauseScreen.Hide();
         gameResultScreen.Hide();
+        settingScreen?.Hide();
+
+        // Play menu music
+        if (audioPlayer != null)
+        {
+            audioPlayer.PlayMenuMusic();
+        }
 
         Debug.Log("GameManager: Initialized successfully");
     }
@@ -176,6 +218,12 @@ public class GameManager : MonoBehaviour
         if (runProgressTracker != null)
         {
             runProgressTracker.StartTracking(catSpawnPoint.position);
+        }
+
+        // Play gameplay music
+        if (audioPlayer != null)
+        {
+            audioPlayer.PlayGameplayMusic();
         }
 
         EventSystem.current.SetSelectedGameObject(null);
@@ -245,6 +293,28 @@ public class GameManager : MonoBehaviour
         Debug.Log("GameManager: Returned to home screen");
     }
 
+    void OnSettingReturnClicked()
+    {
+        Debug.Log("GameManager: Setting return clicked");
+
+        if (settingScreen != null)
+        {
+            settingScreen.Hide();
+        }
+
+        // Return to appropriate screen based on state
+        if (currentState == GameState.STARTING)
+        {
+            startingScreen.Show();
+        }
+        else if (currentState == GameState.PAUSED)
+        {
+            pauseScreen.Show();
+        }
+
+        EventSystem.current.SetSelectedGameObject(null);
+    }
+
     private void OnLoseCondition(string collisionTag)
     {
         HandlePlayerDeath($"obstacle ({collisionTag})");
@@ -304,6 +374,16 @@ public class GameManager : MonoBehaviour
         gamerunScreen.Hide();
         pauseScreen.Hide();
         gameResultScreen.Hide();
+        if (settingScreen != null)
+        {
+            settingScreen.Hide();
+        }
+
+        // Stop music during reset/loading
+        if (audioPlayer != null)
+        {
+            audioPlayer.StopMusic();
+        }
 
         // Reset cat position and state
         ResetCat();

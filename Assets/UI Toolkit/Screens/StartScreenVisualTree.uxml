@@ -1,10 +1,13 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/UI%20Toolkit/Screens/StartScreenStyle.uss?fileID=7433441132597879392&amp;guid=5ff5e8710ca0a594ea2ffc295ea615c9&amp;type=3#StartScreenStyle" />
+    <Style src="project://database/Assets/UI%20Toolkit/Screens/GamerunScreenStyle.uss?fileID=7433441132597879392&amp;guid=a2614dbbbbb98244c80438f869b1106a&amp;type=3#GamerunScreenStyle" />
     <ui:VisualElement name="Container" style="flex-grow: 1; justify-content: center; align-items: center; flex-direction: column; align-self: stretch;">
-        <ui:VisualElement name="UpperMenu" style="align-self: stretch; height: 10%;" />
+        <ui:VisualElement name="UpperMenu" style="align-self: stretch; height: 10%; align-items: flex-start;">
+            <ui:Button text="Button" parse-escape-sequences="true" display-tooltip-when-elided="true" name="PauseButton" class="pauseButton" style="background-image: url(&quot;project://database/Assets/UI%20Toolkit/Sprites/IconsShadow-64.png?fileID=-439941471&amp;guid=bf059ab01e3fec84f9fafd8d3cb5ba53&amp;type=3#IconsShadow-64_85&quot;); overflow: visible;" />
+        </ui:VisualElement>
         <ui:VisualElement name="CenterArea" style="flex-grow: 1; align-self: stretch; align-items: center; justify-content: center;">
-            <ui:Button name="TapToPlayArea" style="opacity: 0; width: auto; height: 100%; align-self: stretch;" />
             <ui:Label tabindex="-1" text="Tap anywhere here to start..." parse-escape-sequences="true" display-tooltip-when-elided="true" name="PlayMessage" class="playMessage" style="white-space: nowrap; position: absolute; font-size: 40px;" />
+            <ui:Button name="TapToPlayArea" style="opacity: 0; width: auto; height: 100%; align-self: stretch;" />
         </ui:VisualElement>
         <ui:VisualElement name="BottomMenu" style="align-self: stretch; height: 10%;" />
     </ui:VisualElement>
