@@ -1,0 +1,23 @@
+.resultLabel {
+    margin-right: 2px;
+    margin-left: 2px;
+    -unity-font-definition: url("project://database/Assets/UI%20Toolkit/Fonts/at01_SDF_2.asset?fileID=11400000&guid=f826840a18328f14bbbedda043d89b3c&type=2#at01_SDF_2");
+    -unity-text-align: upper-center;
+    font-size: 36px;
+    padding-top: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+}
+
+.smallResultLabel {
+    margin-right: 2px;
+    margin-left: 2px;
+    -unity-font-definition: url("project://database/Assets/UI%20Toolkit/Fonts/at01_SDF_2.asset?fileID=11400000&guid=f826840a18328f14bbbedda043d89b3c&type=2#at01_SDF_2");
+    -unity-text-align: upper-center;
+    font-size: 24px;
+    padding-top: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+}

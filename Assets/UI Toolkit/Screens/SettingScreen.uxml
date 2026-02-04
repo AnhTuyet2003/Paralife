@@ -1,0 +1,27 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
+    <Style src="project://database/Assets/PauseDialogStyle.uss?fileID=7433441132597879392&amp;guid=bf4d0213014b16348ba9316841af9598&amp;type=3#PauseDialogStyle" />
+    <Style src="project://database/Assets/UI%20Toolkit/Screens/GamerunResultScreenStyle.uss?fileID=7433441132597879392&amp;guid=1bb826f91b52c314497c3462c0f7f342&amp;type=3#GamerunResultScreenStyle" />
+    <ui:VisualElement name="SettingScreenRoot" style="flex-grow: 1; justify-content: center;">
+        <ui:VisualElement name="DialogContainer" class="dialogContainer" style="flex-grow: 0; align-self: center; justify-content: center; align-items: stretch;">
+            <ui:Label tabindex="-1" text="Settings" parse-escape-sequences="true" display-tooltip-when-elided="true" name="SettingLabel" class="settingLabel" style="margin-bottom: 16px;" />
+            <ui:VisualElement name="SettingsStack" style="flex-grow: 0;">
+                <ui:VisualElement name="SoundEffectStack" style="flex-grow: 0; flex-direction: row;">
+                    <ui:SliderInt label="Sound Effect" high-value="100" name="SoundEffectVolumeSlider" show-input-field="false" class="resultLabel smallResultLabel" style="align-self: stretch; flex-grow: 1; padding-top: 0; padding-right: 24px; padding-bottom: 0; padding-left: 0; -unity-font-style: bold;" />
+                </ui:VisualElement>
+                <ui:VisualElement name="MusicStack" style="flex-grow: 0; flex-direction: row;">
+                    <ui:SliderInt label="Music" high-value="100" name="MusicVolumeSlider" class="resultLabel smallResultLabel" style="align-self: stretch; flex-grow: 1; padding-top: 0; padding-right: 24px; padding-bottom: 0; padding-left: 0; -unity-font-style: bold;" />
+                </ui:VisualElement>
+            </ui:VisualElement>
+            <ui:VisualElement name="OptionContainer" class="optionContainer" style="align-self: stretch; align-items: stretch; flex-direction: row; justify-content: space-around; margin-top: 16px;">
+                <ui:Button text="Button" parse-escape-sequences="true" display-tooltip-when-elided="true" name="ReturnOption" class="optionButton" style="margin-top: 0%; margin-right: 0%; margin-bottom: 0%; margin-left: 0%;">
+                    <ui:VisualElement name="OptionIcon" class="optionIcon" style="background-image: url(&quot;project://database/Assets/UI%20Toolkit/Sprites/IconsShadow-64.png?fileID=-1709963455&amp;guid=bf059ab01e3fec84f9fafd8d3cb5ba53&amp;type=3#IconsShadow-64_94&quot;);" />
+                    <ui:Label tabindex="-1" text="Return" parse-escape-sequences="true" display-tooltip-when-elided="true" name="OptionName" class="optionName" />
+                </ui:Button>
+                <ui:Button text="Button" parse-escape-sequences="true" display-tooltip-when-elided="true" name="ApplyOption" class="optionButton" style="margin-top: 0%; margin-right: 0%; margin-bottom: 0%; margin-left: 0%;">
+                    <ui:VisualElement name="OptionIcon" class="optionIcon" style="background-image: url(&quot;project://database/Assets/UI%20Toolkit/Sprites/IconsShadow-64.png?fileID=-648819291&amp;guid=bf059ab01e3fec84f9fafd8d3cb5ba53&amp;type=3#IconsShadow-64_48&quot;);" />
+                    <ui:Label tabindex="-1" text="Apply" parse-escape-sequences="true" display-tooltip-when-elided="true" name="OptionName" class="optionName" />
+                </ui:Button>
+            </ui:VisualElement>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>
