@@ -8,26 +8,20 @@ public class StartingScreen : MonoBehaviour
     private UIDocument _uiDocument;
 
     private Button _startButton;
-    private Button _settingsButton;
 
     private Action _onStartButtonClicked;
-    private Action _onSettingsButtonClicked;
 
     private void Awake()
     {
         _uiDocument = GetComponent<UIDocument>();
 
         _startButton = _uiDocument.rootVisualElement.Q<Button>("TapToPlayArea");
-        _settingsButton = _uiDocument.rootVisualElement.Q<Button>("PauseButton");
-
         _startButton.RegisterCallback<ClickEvent>(ev => OnStartButtonClicked());
-        _settingsButton.clicked += () => _onSettingsButtonClicked?.Invoke();
     }
 
-    public void Initialize(Action onStartButtonClicked, Action onSettingsButtonClicked)
+    public void Initialize(Action onStartButtonClicked)
     {
         _onStartButtonClicked = onStartButtonClicked;
-        _onSettingsButtonClicked = onSettingsButtonClicked;
     }
 
     public void Show()

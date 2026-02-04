@@ -1,17 +1,9 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" xsi="http://www.w3.org/2001/XMLSchema-instance" engine="UnityEngine.UIElements" editor="UnityEditor.UIElements" noNamespaceSchemaLocation="../../../UIElementsSchema/UIElements.xsd" editor-extension-mode="False">
     <Style src="project://database/Assets/UI%20Toolkit/Screens/GamerunScreenStyle.uss?fileID=7433441132597879392&amp;guid=a2614dbbbbb98244c80438f869b1106a&amp;type=3#GamerunScreenStyle" />
     <ui:VisualElement name="GameplayElements" style="flex-grow: 1; align-items: auto; align-self: stretch; justify-content: flex-start;">
-        <ui:VisualElement name="StatStack" style="flex-grow: 0; flex-direction: row; align-self: stretch; justify-content: space-between;">
-            <ui:VisualElement name="LeftStack" style="flex-grow: 0; margin-top: 2%; margin-left: 2%;">
-                <ui:VisualElement name="CoinDisplayer" style="flex-grow: 0; flex-direction: row; justify-content: flex-start; align-items: center;">
-                    <ui:VisualElement name="CoinIcon" style="flex-grow: 1; background-image: url(&quot;project://database/Assets/Sprites/PowerUps/SilverCoin.png?fileID=372374712&amp;guid=3fab5eb310127074e98643fb8f4046fd&amp;type=3#MonedaP_0&quot;); width: 32px; height: 32px; margin-right: 4px;" />
-                    <ui:Label tabindex="-1" text="0" parse-escape-sequences="true" display-tooltip-when-elided="true" name="CoinAmount" class="score meter" style="-unity-font-style: bold;" />
-                </ui:VisualElement>
-            </ui:VisualElement>
-            <ui:VisualElement name="MetricsDisplayer" style="align-items: flex-end; align-self: flex-end; margin-right: 2%; margin-top: 2%;">
-                <ui:Label tabindex="-1" text="0m" parse-escape-sequences="true" display-tooltip-when-elided="true" name="RunningDistance" class="meter" style="margin-bottom: 0; padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0;" />
-                <ui:Label tabindex="-1" text="0" parse-escape-sequences="true" display-tooltip-when-elided="true" name="Score" class="score" style="padding-top: 0; padding-right: 0; padding-bottom: 0; padding-left: 0;" />
-            </ui:VisualElement>
+        <ui:VisualElement name="MetricsDisplayer" style="align-items: flex-end; align-self: flex-end; margin-right: 2%; margin-top: 2%;">
+            <ui:Label tabindex="-1" text="0m" parse-escape-sequences="true" display-tooltip-when-elided="true" name="RunningDistance" class="meter" />
+            <ui:Label tabindex="-1" text="0" parse-escape-sequences="true" display-tooltip-when-elided="true" name="Score" class="score" />
         </ui:VisualElement>
         <ui:VisualElement name="EmptyArea" picking-mode="Ignore" style="flex-grow: 1; align-self: stretch;" />
         <ui:Button text="Button" parse-escape-sequences="true" display-tooltip-when-elided="true" name="PauseButton" class="pauseButton" />

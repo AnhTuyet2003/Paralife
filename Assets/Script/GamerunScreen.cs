@@ -1,6 +1,4 @@
 using System;
-using Collectibles.Coins;
-using Gameplay;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -11,11 +9,7 @@ public class GamerunScreen : MonoBehaviour
 
     private Label _runningDistanceDisplayingLabel;
     private Label _scoreDisplayingLabel;
-    private Label _coinAmountDisplayingLabel;
     private Button _pauseButton;
-
-    private RunProgressTracker _progressTracker;
-    private CoinCollector _coinCollector;
 
     void Awake()
     {
@@ -23,44 +17,15 @@ public class GamerunScreen : MonoBehaviour
 
         _runningDistanceDisplayingLabel = _uiDocument.rootVisualElement.Q<Label>("RunningDistance");
         _scoreDisplayingLabel = _uiDocument.rootVisualElement.Q<Label>("Score");
-        _coinAmountDisplayingLabel = _uiDocument.rootVisualElement.Q<Label>("CoinAmount");
         _pauseButton = _uiDocument.rootVisualElement.Q<Button>("PauseButton");
+
+        // TODO: Show the score if the score system is implemented
+        _scoreDisplayingLabel.style.display = DisplayStyle.None;
     }
 
-    public void Initialize(
-        Action onPauseButtonClicked,
-        RunProgressTracker progressTracker,
-        CoinCollector coinCollector
-    )
+    public void Initialize(Action onPauseButtonClicked)
     {
         _pauseButton.clicked += onPauseButtonClicked;
-
-        _progressTracker = progressTracker;
-        if (_progressTracker != null)
-        {
-            _progressTracker.OnDistanceChanged += SetDistanceValue;
-            _progressTracker.OnScoreChanged += SetScoreValue;
-        }
-
-        _coinCollector = coinCollector;
-        if (_coinCollector != null)
-        {
-            _coinCollector.OnCoinAmountChanged += SetCoinAmount;
-        }
-    }
-
-    private void OnDestroy()
-    {
-        if (_progressTracker != null)
-        {
-            _progressTracker.OnDistanceChanged -= SetDistanceValue;
-            _progressTracker.OnScoreChanged -= SetScoreValue;
-        }
-
-        if (_coinCollector != null)
-        {
-            _coinCollector.OnCoinAmountChanged -= SetCoinAmount;
-        }
     }
 
     /// <summary>Sets the distance display value without triggering callbacks.</summary>
@@ -73,12 +38,6 @@ public class GamerunScreen : MonoBehaviour
     public void SetScoreValue(int value)
     {
         _scoreDisplayingLabel.text = value.ToString();
-    }
-
-    /// <summary>Sets the coin amount display value.</summary>
-    public void SetCoinAmount(int value)
-    {
-        _coinAmountDisplayingLabel.text = value.ToString();
     }
 
     public void Show()

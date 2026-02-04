@@ -167,7 +167,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   loadingScreenPrefab: {fileID: 2410301815470638066, guid: 7204cac93e4bc044ca3c6c5e964c52d6, type: 3}
-  playerDataManagerPrefab: {fileID: 3704684853278020873, guid: eb66912e7fa67ae4a9fb908ab10ca368, type: 3}
   gameSceneName: TestPowerUpScene
 --- !u!1 &1982389109
 GameObject:
