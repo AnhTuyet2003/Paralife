@@ -107,10 +107,16 @@ public class GameManager : MonoBehaviour
     private GameObject birdPrefab;
     
     [SerializeField]
+    [Tooltip("Time interval between enemy spawns after the first enemy")]
     private float enemySpawnInterval = 30f;
     
     [SerializeField]
+    [Tooltip("Delay before the first enemy spawns")]
     private float firstEnemySpawnDelay = 15f;
+    
+    [SerializeField]
+    [Tooltip("Minimum free time after an enemy is destroyed before spawning next enemy")]
+    private float minFreeTimeBetweenEnemies = 5f;
     
     [Range(0f, 1f)]
     [SerializeField]
@@ -149,8 +155,10 @@ public class GameManager : MonoBehaviour
     private float enemySpawnTimer = 0f;
     private bool firstEnemySpawned = false;
     private GameObject currentEnemy;
+    private float lastEnemyDestroyedTime = 0f;
     
     private float lastHealDistance = 0f;
+    private float lastEnemySpawnTime = 0f;
 
     #endregion
 
@@ -443,13 +451,19 @@ public class GameManager : MonoBehaviour
     {
         enemySpawnTimer += Time.deltaTime;
         
-        if (!firstEnemySpawned && enemySpawnTimer >= firstEnemySpawnDelay)
+        // Check if enough free time has passed since last enemy was destroyed
+        float timeSinceLastEnemy = Time.time - lastEnemyDestroyedTime;
+        bool hasMinFreeTimePassed = timeSinceLastEnemy >= minFreeTimeBetweenEnemies;
+        
+        // First enemy spawn (only if free time condition is met)
+        if (!firstEnemySpawned && enemySpawnTimer >= firstEnemySpawnDelay && hasMinFreeTimePassed)
         {
             SpawnRandomEnemy();
             firstEnemySpawned = true;
             enemySpawnTimer = 0f;
         }
-        else if (firstEnemySpawned && enemySpawnTimer >= enemySpawnInterval)
+        // Subsequent enemy spawns (only if free time condition is met)
+        else if (firstEnemySpawned && enemySpawnTimer >= enemySpawnInterval && hasMinFreeTimePassed)
         {
             SpawnRandomEnemy();
             enemySpawnTimer = 0f;
@@ -458,11 +472,14 @@ public class GameManager : MonoBehaviour
 
     void SpawnRandomEnemy()
     {
+        // Destroy previous enemy if still exists and record the time
         if (currentEnemy != null)
         {
             Destroy(currentEnemy);
+            lastEnemyDestroyedTime = Time.time;
         }
         
+        // Random chance to spawn Gator or Bird
         float randomValue = Random.value;
         
         if (randomValue < gatorSpawnChance)
@@ -473,6 +490,8 @@ public class GameManager : MonoBehaviour
         {
             SpawnBird();
         }
+        
+        Debug.Log($"GameManager: Enemy spawned. Next spawn allowed after {minFreeTimeBetweenEnemies}s free time.");
     }
 
     void SpawnGator()
@@ -487,6 +506,7 @@ public class GameManager : MonoBehaviour
         currentEnemy = Instantiate(gatorPrefab, spawnPosition, Quaternion.identity);
         
         Debug.Log("GameManager: Spawned Gator enemy at " + spawnPosition);
+        lastEnemySpawnTime = Time.time;
     }
 
     void SpawnBird()
@@ -501,13 +521,16 @@ public class GameManager : MonoBehaviour
         currentEnemy = Instantiate(birdPrefab, spawnPosition, Quaternion.identity);
         
         Debug.Log("GameManager: Spawned Bird enemy at " + spawnPosition);
+        lastEnemySpawnTime = Time.time;
     }
 
     void ResetEnemySpawning()
     {
         enemySpawnTimer = 0f;
         firstEnemySpawned = false;
+        lastEnemyDestroyedTime = 0f;
         
+        // Destroy current enemy if exists
         if (currentEnemy != null)
         {
             Destroy(currentEnemy);

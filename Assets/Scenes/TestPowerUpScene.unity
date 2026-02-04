@@ -162,8 +162,8 @@ MonoBehaviour:
   gameResultScreenPrefab: {fileID: -1824944695138800621, guid: d5d5fe40c96716542ac0d872f15595ed, type: 3}
   settingScreenPrefab: {fileID: 3363232031647506790, guid: 7510a2505792e8142b78332d27f32763, type: 3}
   audioPlayer: {fileID: 378071020}
-  healthBarPrefab: {fileID: 0}
-  staminaBarPrefab: {fileID: 0}
+  healthBarPrefab: {fileID: 5320372526663397429, guid: fb78655a82f26a143bddf259b673d355, type: 3}
+  staminaBarPrefab: {fileID: 3464914763219960995, guid: d25fe51666ec69e4bbda9570055313b2, type: 3}
   uiCanvas: {fileID: 762620261}
   gatorPrefab: {fileID: 4728042700154031828, guid: 4bfe953d62403e3438ec19d0dae5543c, type: 3}
   birdPrefab: {fileID: 3197322853826163886, guid: 1b0581a2fa8393746a49a8623173bf64, type: 3}
@@ -5262,7 +5262,7 @@ Transform:
   m_GameObject: {fileID: 290400404}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 9.955555, y: -4.5, z: -10}
+  m_LocalPosition: {x: 9.955555, y: -11.199999, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -6162,7 +6162,7 @@ Transform:
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 9.955555, y: -4.5, z: -10}
+  m_LocalPosition: {x: 9.955555, y: -11.199999, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
