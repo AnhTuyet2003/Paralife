@@ -48,6 +48,22 @@ public class GameManager : MonoBehaviour
 
         settingScreen.Show();
     }
+    /// <summary>Gets the current distance traveled.</summary>
+    public float GetCurrentDistance() => currentDistance;
+
+    /// <summary>Gets the current score.</summary>
+    public float GetCurrentScore() => currentScore;
+
+    /// <summary>Adds points to the score and broadcasts the change.</summary>
+    public void AddScore(float points)
+    {
+        currentScore += points;
+        if (Mathf.Abs(currentScore - lastBroadcastedScore) > 0.01f)
+        {
+            lastBroadcastedScore = currentScore;
+            gamerunScreen.SetScoreValue(Mathf.FloorToInt(currentScore));
+        }
+    }
 
     #endregion
 
@@ -90,14 +106,91 @@ public class GameManager : MonoBehaviour
 
     private GameResultScreen gameResultScreen;
     private SettingScreen settingScreen;
+    [SerializeField]
+    private GameOverScreen gameOverScreenPrefab;
+    
+    [SerializeField]
+    private HealthBar healthBarPrefab;
+    
+    [SerializeField]
+    private GameObject staminaBarPrefab;
+    
+    [Header("UI Canvas")]
+    [SerializeField]
+    [Tooltip("The Canvas that will contain the Health Bar UI")]
+    private Canvas uiCanvas;
 
+    [Header("Background Music")]
+    [SerializeField]
+    private AudioClip menuMusic;
+    
+    [SerializeField]
+    private AudioClip gameplayMusic;
+    
+    [Range(0f, 1f)]
+    [SerializeField]
+    private float musicVolume = 0.5f;
+    
+    [SerializeField]
+    private float musicFadeDuration = 1.0f;
+
+    [Header("Enemy Spawning")]
+    [SerializeField]
+    private GameObject gatorPrefab;
+    
+    [SerializeField]
+    private GameObject birdPrefab;
+    
+    [SerializeField]
+    private float enemySpawnInterval = 30f;
+    
+    [SerializeField]
+    private float firstEnemySpawnDelay = 15f;
+    
+    [Range(0f, 1f)]
+    [SerializeField]
+    private float gatorSpawnChance = 0.5f;
+    
+    [SerializeField]
+    private Vector3 gatorSpawnOffset = new Vector3(-15f, 3f, 0f);
+    
+    [SerializeField]
+    private Vector3 birdSpawnOffset = new Vector3(15f, 5f, 0f);
+
+    [Header("Health Regeneration")]
+    [SerializeField]
+    private float healDistanceInterval = 250f;
+    
+    [SerializeField]
+    private float healAmount = 0.25f;
+
+    private GameOverScreen gameOverScreen;
     private GameState currentState = GameState.STARTING;
-
     private StartingScreen startingScreen;
     private GamerunScreen gamerunScreen;
     private PauseScreen pauseScreen;
-
+    private HealthBar healthBar;
+    private PlayerHealth playerHealth;
+    private GameObject staminaBarObject;
+    private StaminaBar staminaBar;
+    private StaminaBarSlider staminaBarSlider;
+    private PlayerStamina playerStamina;
+    
     private float initialCatMaxSpeed;
+    private Vector3 spawnPositionOffset;
+    private float currentDistance = 0f;
+    private float currentScore = 0f;
+    private float lastBroadcastedDistance = -1f;
+    private float lastBroadcastedScore = -1f;
+    
+    private AudioSource musicAudioSource;
+    private bool isFadingMusic = false;
+    
+    private float enemySpawnTimer = 0f;
+    private bool firstEnemySpawned = false;
+    private GameObject currentEnemy;
+    
+    private float lastHealDistance = 0f;
 
     #endregion
 
@@ -130,6 +223,15 @@ public class GameManager : MonoBehaviour
             return;
         }
 
+        // Setup background music
+        SetupBackgroundMusic();
+        
+        // Setup player health
+        SetupPlayerHealth();
+        
+        // Setup player stamina
+        SetupPlayerStamina();
+
         // Store initial cat max speed
         initialCatMaxSpeed = catPlayer.maxSpeed;
 
@@ -145,6 +247,73 @@ public class GameManager : MonoBehaviour
         if (settingScreenPrefab != null)
         {
             settingScreen = Instantiate(settingScreenPrefab);
+        }
+        gameOverScreen = Instantiate(gameOverScreenPrefab);
+        
+        // Instantiate health bar and parent it to Canvas
+        healthBar = Instantiate(healthBarPrefab);
+        
+        // Instantiate stamina bar and parent it to Canvas
+        if (staminaBarPrefab != null)
+        {
+            staminaBarObject = Instantiate(staminaBarPrefab);
+            staminaBar = staminaBarObject.GetComponent<StaminaBar>();
+            staminaBarSlider = staminaBarObject.GetComponent<StaminaBarSlider>();
+        }
+        
+        // Use assigned Canvas or find one in scene
+        Canvas canvas = uiCanvas;
+        if (canvas == null)
+        {
+            // Fallback: try to find Canvas in scene if not assigned
+            canvas = FindObjectOfType<Canvas>();
+            Debug.LogWarning("GameManager: UI Canvas not assigned! Using FindObjectOfType as fallback.");
+        }
+        
+        if (canvas != null)
+        {
+            healthBar.transform.SetParent(canvas.transform, false);
+            Debug.Log("GameManager: HealthBar parented to Canvas: " + canvas.name);
+            
+            if (staminaBarObject != null)
+            {
+                staminaBarObject.transform.SetParent(canvas.transform, false);
+                Debug.Log("GameManager: StaminaBar parented to Canvas: " + canvas.name);
+            }
+        }
+        else
+        {
+            Debug.LogError("GameManager: No Canvas found in scene! HealthBar and StaminaBar will not be visible.");
+        }
+
+        // Initialize health bar with player's max health
+        if (healthBar != null && playerHealth != null)
+        {
+            healthBar.Initialize(playerHealth.GetMaxHealth());
+        }
+        
+        // Initialize stamina bar with player's max stamina
+        if (playerStamina != null)
+        {
+            if (staminaBar != null)
+            {
+                staminaBar.Initialize(playerStamina.GetMaxStamina());
+            }
+            
+            if (staminaBarSlider != null)
+            {
+                staminaBarSlider.Initialize(playerStamina.GetMaxStamina());
+            }
+        }
+        
+        // Check if using slider-based stamina bar instead
+        if (staminaBar != null)
+        {
+            staminaBarSlider = staminaBar.GetComponent<StaminaBarSlider>();
+            if (staminaBarSlider != null && playerStamina != null)
+            {
+                staminaBarSlider.Initialize(playerStamina.GetMaxStamina());
+            }
         }
 
         // Initialize screens with callbacks
@@ -175,6 +344,13 @@ public class GameManager : MonoBehaviour
         if (audioPlayer != null)
         {
             audioPlayer.PlayMenuMusic();
+        }    
+            
+        gameOverScreen.Hide();
+        healthBar.gameObject.SetActive(false);
+        if (staminaBarObject != null)
+        {
+            staminaBarObject.SetActive(false);
         }
 
         Debug.Log("GameManager: Initialized successfully");
@@ -183,6 +359,24 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         currentState = GameState.STARTING;
+        currentDistance = 0f;
+        currentScore = 0f;
+        
+        // Start playing menu music
+        PlayMenuMusic();
+    }
+
+    void Update()
+    {
+        if (currentState != GameState.RUNNING)
+        {
+            return;
+        }
+
+        UpdateDistance();
+        UpdateScore();
+        UpdateEnemySpawning();
+        UpdateHealthRegeneration();
     }
 
     void OnDestroy()
@@ -192,6 +386,345 @@ public class GameManager : MonoBehaviour
             loseConditionObserver.OnObstacleHit -= OnLoseCondition;
             loseConditionObserver.OnHoleFall -= OnHoleFall;
         }
+        
+        // Unsubscribe from player health events
+        if (playerHealth != null)
+        {
+            playerHealth.OnHealthChanged -= OnPlayerHealthChanged;
+            playerHealth.OnPlayerDied -= OnPlayerDied;
+        }
+        
+        // Unsubscribe from player stamina events
+        if (playerStamina != null)
+        {
+            playerStamina.OnStaminaChanged -= OnPlayerStaminaChanged;
+        }
+        
+        // Stop music
+        if (musicAudioSource != null)
+        {
+            musicAudioSource.Stop();
+        }
+        
+        // Destroy current enemy if exists
+        if (currentEnemy != null)
+        {
+            Destroy(currentEnemy);
+        }
+    }
+
+    #endregion
+
+    //---------------------------------------------------------------------------------------------
+
+    #region Player Health Methods
+
+    void SetupPlayerHealth()
+    {
+        // Add or get PlayerHealth component
+        playerHealth = catPlayer.GetComponent<PlayerHealth>();
+        if (playerHealth == null)
+        {
+            playerHealth = catPlayer.gameObject.AddComponent<PlayerHealth>();
+        }
+        
+        // Subscribe to health events
+        playerHealth.OnHealthChanged += OnPlayerHealthChanged;
+        playerHealth.OnPlayerDied += OnPlayerDied;
+        
+        Debug.Log("GameManager: Player health system initialized");
+    }
+
+    void OnPlayerHealthChanged(float currentHealth, int maxHealth)
+    {
+        // Update health bar
+        if (healthBar != null)
+        {
+            healthBar.UpdateHealth(currentHealth, maxHealth);
+        }
+        
+        Debug.Log("GameManager: Player health changed to " + currentHealth + "/" + maxHealth);
+    }
+
+    void OnPlayerDied()
+    {
+        Debug.Log("GameManager: Player died from health loss!");
+        
+        if (currentState == GameState.DEAD)
+        {
+            return; // Already dead
+        }
+        
+        // Mark as dead
+        currentState = GameState.DEAD;
+        
+        // Stop cat
+        catPlayer.maxSpeed = 0f;
+        catPlayer.rb.velocity = Vector2.zero;
+        catPlayer.rb.angularVelocity = 0f;
+        
+        // Hide active screens
+        gamerunScreen.Hide();
+        pauseScreen.Hide();
+        
+        // Wait and show game over
+        WaitAndShowGameOver();
+    }
+
+    async void WaitAndShowGameOver()
+    {
+        await UniTask.Delay(1_000);
+        ShowGameOver();
+    }
+
+    #endregion
+
+    //---------------------------------------------------------------------------------------------
+
+    #region Player Stamina Methods
+
+    void SetupPlayerStamina()
+    {
+        // Add or get PlayerStamina component
+        playerStamina = catPlayer.GetComponent<PlayerStamina>();
+        if (playerStamina == null)
+        {
+            playerStamina = catPlayer.gameObject.AddComponent<PlayerStamina>();
+            Debug.Log("GameManager: Created new PlayerStamina component");
+        }
+        else
+        {
+            Debug.Log("GameManager: Found existing PlayerStamina component");
+        }
+        
+        // Subscribe to stamina events
+        playerStamina.OnStaminaChanged += OnPlayerStaminaChanged;
+        
+        Debug.Log("GameManager: Player stamina system initialized - Max=" + playerStamina.GetMaxStamina() + 
+                  " Current=" + playerStamina.GetCurrentStamina());
+    }
+
+    void OnPlayerStaminaChanged(float currentStamina, float maxStamina)
+    {
+        Debug.Log("GameManager: OnPlayerStaminaChanged called - " + currentStamina + "/" + maxStamina + 
+                  " | staminaBar=" + (staminaBar != null) + 
+                  " | staminaBarSlider=" + (staminaBarSlider != null));
+        
+        // Update stamina bar (segment-based)
+        if (staminaBar != null && staminaBarSlider == null)
+        {
+            staminaBar.UpdateStamina(currentStamina, maxStamina);
+        }
+        
+        // Update stamina bar (slider-based)
+        if (staminaBarSlider != null)
+        {
+            staminaBarSlider.UpdateStamina(currentStamina, maxStamina);
+        }
+        
+        Debug.Log("GameManager: Player stamina changed to " + currentStamina + "/" + maxStamina);
+    }
+
+    #endregion
+
+    //---------------------------------------------------------------------------------------------
+
+    #region Enemy Spawning Methods
+
+    void UpdateEnemySpawning()
+    {
+        enemySpawnTimer += Time.deltaTime;
+        
+        // First enemy spawn
+        if (!firstEnemySpawned && enemySpawnTimer >= firstEnemySpawnDelay)
+        {
+            SpawnRandomEnemy();
+            firstEnemySpawned = true;
+            enemySpawnTimer = 0f;
+        }
+        // Subsequent enemy spawns
+        else if (firstEnemySpawned && enemySpawnTimer >= enemySpawnInterval)
+        {
+            SpawnRandomEnemy();
+            enemySpawnTimer = 0f;
+        }
+    }
+
+    void SpawnRandomEnemy()
+    {
+        // Destroy previous enemy if still exists
+        if (currentEnemy != null)
+        {
+            Destroy(currentEnemy);
+        }
+        
+        // Random chance to spawn Gator or Bird
+        float randomValue = Random.value;
+        
+        if (randomValue < gatorSpawnChance)
+        {
+            SpawnGator();
+        }
+        else
+        {
+            SpawnBird();
+        }
+    }
+
+    void SpawnGator()
+    {
+        if (gatorPrefab == null)
+        {
+            Debug.LogWarning("GameManager: Gator prefab not assigned!");
+            return;
+        }
+        
+        // Spawn position relative to player
+        Vector3 spawnPosition = catPlayer.transform.position + gatorSpawnOffset;
+        currentEnemy = Instantiate(gatorPrefab, spawnPosition, Quaternion.identity);
+        
+        Debug.Log("GameManager: Spawned Gator enemy at " + spawnPosition);
+    }
+
+    void SpawnBird()
+    {
+        if (birdPrefab == null)
+        {
+            Debug.LogWarning("GameManager: Bird prefab not assigned!");
+            return;
+        }
+        
+        // Spawn position relative to player
+        Vector3 spawnPosition = catPlayer.transform.position + birdSpawnOffset;
+        currentEnemy = Instantiate(birdPrefab, spawnPosition, Quaternion.identity);
+        
+        Debug.Log("GameManager: Spawned Bird enemy at " + spawnPosition);
+    }
+
+    void ResetEnemySpawning()
+    {
+        enemySpawnTimer = 0f;
+        firstEnemySpawned = false;
+        
+        // Destroy current enemy if exists
+        if (currentEnemy != null)
+        {
+            Destroy(currentEnemy);
+            currentEnemy = null;
+        }
+    }
+
+    #endregion
+
+    //---------------------------------------------------------------------------------------------
+
+    #region Background Music Methods
+
+    void SetupBackgroundMusic()
+    {
+        // Create a persistent AudioSource for background music
+        musicAudioSource = gameObject.AddComponent<AudioSource>();
+        musicAudioSource.playOnAwake = false;
+        musicAudioSource.loop = true;
+        musicAudioSource.volume = 0f; // Start at 0 for fade in
+        
+        Debug.Log("GameManager: Background music system initialized");
+    }
+
+    void PlayMenuMusic()
+    {
+        if (menuMusic != null && musicAudioSource != null)
+        {
+            if (musicAudioSource.clip != menuMusic)
+            {
+                CrossfadeToMusic(menuMusic);
+            }
+            else if (!musicAudioSource.isPlaying)
+            {
+                musicAudioSource.Play();
+                StartCoroutine(FadeInMusic());
+            }
+            Debug.Log("GameManager: Playing menu music");
+        }
+        else if (menuMusic == null)
+        {
+            Debug.LogWarning("GameManager: Menu music not assigned!");
+        }
+    }
+
+    void PlayGameplayMusic()
+    {
+        if (gameplayMusic != null && musicAudioSource != null)
+        {
+            if (musicAudioSource.clip != gameplayMusic)
+            {
+                CrossfadeToMusic(gameplayMusic);
+            }
+            Debug.Log("GameManager: Playing gameplay music");
+        }
+        else if (gameplayMusic == null)
+        {
+            Debug.LogWarning("GameManager: Gameplay music not assigned!");
+        }
+    }
+
+    void CrossfadeToMusic(AudioClip newClip)
+    {
+        if (!isFadingMusic)
+        {
+            StartCoroutine(CrossfadeMusicCoroutine(newClip));
+        }
+    }
+
+    System.Collections.IEnumerator CrossfadeMusicCoroutine(AudioClip newClip)
+    {
+        isFadingMusic = true;
+        
+        // Fade out current music
+        if (musicAudioSource.isPlaying)
+        {
+            float startVolume = musicAudioSource.volume;
+            float elapsed = 0f;
+            
+            while (elapsed < musicFadeDuration)
+            {
+                elapsed += Time.unscaledDeltaTime; // Use unscaled for pause compatibility
+                musicAudioSource.volume = Mathf.Lerp(startVolume, 0f, elapsed / musicFadeDuration);
+                yield return null;
+            }
+            
+            musicAudioSource.Stop();
+        }
+        
+        // Switch to new clip
+        musicAudioSource.clip = newClip;
+        musicAudioSource.Play();
+        
+        // Fade in new music
+        float elapsed2 = 0f;
+        while (elapsed2 < musicFadeDuration)
+        {
+            elapsed2 += Time.unscaledDeltaTime;
+            musicAudioSource.volume = Mathf.Lerp(0f, musicVolume, elapsed2 / musicFadeDuration);
+            yield return null;
+        }
+        
+        musicAudioSource.volume = musicVolume;
+        isFadingMusic = false;
+    }
+
+    System.Collections.IEnumerator FadeInMusic()
+    {
+        float elapsed = 0f;
+        
+        while (elapsed < musicFadeDuration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            musicAudioSource.volume = Mathf.Lerp(0f, musicVolume, elapsed / musicFadeDuration);
+            yield return null;
+        }
+        
+        musicAudioSource.volume = musicVolume;
     }
 
     #endregion
@@ -199,6 +732,47 @@ public class GameManager : MonoBehaviour
     //---------------------------------------------------------------------------------------------
 
     #region Private Methods
+
+    void UpdateDistance()
+    {
+        float newDistance = Mathf.Max(0f, catPlayer.transform.position.x - spawnPositionOffset.x);
+        int flooredDistance = Mathf.FloorToInt(newDistance);
+
+        if (flooredDistance != Mathf.FloorToInt(lastBroadcastedDistance))
+        {
+            currentDistance = flooredDistance;
+            lastBroadcastedDistance = flooredDistance;
+
+            // Update the screen display
+            gamerunScreen.SetDistanceValue(Mathf.FloorToInt(currentDistance));
+        }
+    }
+
+    void UpdateScore()
+    {
+        // Score update logic placeholder - can be expanded later
+        // For now, score is updated via events (obstacles passed, etc.)
+    }
+
+    void UpdateHealthRegeneration()
+    {
+        // Calculate current distance
+        float currentDist = catPlayer.transform.position.x - spawnPositionOffset.x;
+        
+        // Check if player has traveled another heal interval
+        if (currentDist >= lastHealDistance + healDistanceInterval)
+        {
+            // Heal the player
+            if (playerHealth != null)
+            {
+                playerHealth.Heal(healAmount);
+                Debug.Log("GameManager: Healing player " + healAmount + " HP at " + Mathf.FloorToInt(currentDist) + "m distance");
+            }
+            
+            // Update last heal distance to the next interval
+            lastHealDistance += healDistanceInterval;
+        }
+    }
 
     void OnStartButtonClicked()
     {
@@ -210,6 +784,11 @@ public class GameManager : MonoBehaviour
         // Switch screens
         startingScreen.Hide();
         gamerunScreen.Show();
+        healthBar.gameObject.SetActive(true);
+        if (staminaBarObject != null)
+        {
+            staminaBarObject.SetActive(true);
+        }
 
         // Update state
         currentState = GameState.RUNNING;
@@ -225,6 +804,30 @@ public class GameManager : MonoBehaviour
         {
             audioPlayer.PlayGameplayMusic();
         }
+        // Reset tracking
+        currentDistance = 0f;
+        currentScore = 0f;
+        lastBroadcastedDistance = -1f;
+        lastBroadcastedScore = -1f;
+        lastHealDistance = 0f;
+
+        // Reset enemy spawning
+        ResetEnemySpawning();
+        
+        // Reset player health
+        if (playerHealth != null)
+        {
+            playerHealth.ResetHealth();
+        }
+        
+        // Reset player stamina
+        if (playerStamina != null)
+        {
+            playerStamina.ResetStamina();
+        }
+
+        // Switch back to menu music
+        PlayGameplayMusic();
 
         EventSystem.current.SetSelectedGameObject(null);
 
@@ -352,6 +955,15 @@ public class GameManager : MonoBehaviour
         await UniTask.Delay(1_000);
 
         ShowGameOver();
+        // Reduce health by 1 when hitting an obstacle
+        if (playerHealth != null)
+        {
+            playerHealth.TakeDamage(1);
+            Debug.Log("GameManager: Player took damage from " + collisionTag);
+        }
+        
+        // Note: Death is now handled by OnPlayerDied event when health reaches 0
+        // No need to manually set DEAD state or show game over here
     }
 
     void ShowGameOver()
@@ -360,6 +972,23 @@ public class GameManager : MonoBehaviour
         int finalDistance = runProgressTracker != null ? runProgressTracker.CurrentDistance : 0;
         gameResultScreen.SetResults(finalScore, finalDistance);
         gameResultScreen.Show();
+        // C?p nh?t di?m s? lên màn hình
+        gameOverScreen.SetScore(Mathf.FloorToInt(currentDistance));
+
+        // Hi?n màn hình
+        gameOverScreen.Show();
+        
+        // Hide health bar
+        healthBar.gameObject.SetActive(false);
+        
+        // Hide stamina bar
+        if (staminaBarObject != null)
+        {
+            staminaBarObject.SetActive(false);
+        }
+        
+        // Switch back to menu music
+        PlayMenuMusic();
     }
 
     void ResetGame()
@@ -384,6 +1013,12 @@ public class GameManager : MonoBehaviour
         {
             audioPlayer.StopMusic();
         }
+        gameOverScreen.Hide();
+        healthBar.gameObject.SetActive(false);
+        if (staminaBarObject != null)
+        {
+            staminaBarObject.SetActive(false);
+        }
 
         // Reset cat position and state
         ResetCat();
@@ -393,9 +1028,33 @@ public class GameManager : MonoBehaviour
         {
             runProgressTracker.Reset();
         }
+        // Reset tracking
+        currentDistance = 0f;
+        currentScore = 0f;
+        lastBroadcastedDistance = -1f;
+        lastBroadcastedScore = -1f;
+        lastHealDistance = 0f;
 
         // Disable cat movement
         catPlayer.maxSpeed = 0f;
+
+        // Reset enemy spawning
+        ResetEnemySpawning();
+        
+        // Reset player health
+        if (playerHealth != null)
+        {
+            playerHealth.ResetHealth();
+        }
+        
+        // Reset player stamina
+        if (playerStamina != null)
+        {
+            playerStamina.ResetStamina();
+        }
+
+        // Switch back to menu music
+        PlayMenuMusic();
 
         // Trigger scene reload through GameInitiator
         OnGameReset?.Invoke();
