@@ -1,4 +1,5 @@
 using Cysharp.Threading.Tasks;
+using Persistent;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -8,7 +9,12 @@ public class GameInitiator : MonoBehaviour
     private GameObject loadingScreenPrefab;
 
     [SerializeField]
+    private PlayerDataManager playerDataManagerPrefab;
+
+    [SerializeField]
     private string gameSceneName = "GameScene";
+
+    public static PlayerDataManager PlayerData { get; private set; }
 
     private LoadingScreen _loadingScreen;
     private GameManager _gameManager;
@@ -28,11 +34,17 @@ public class GameInitiator : MonoBehaviour
     {
         GameObject loadingScreenObj = Instantiate(loadingScreenPrefab);
         _loadingScreen = loadingScreenObj.GetComponent<LoadingScreen>();
+
+        if (playerDataManagerPrefab != null)
+            PlayerData = Instantiate(playerDataManagerPrefab);
     }
 
     private async UniTask InitializeObjects()
     {
         DontDestroyOnLoad(_loadingScreen.gameObject);
+
+        if (PlayerData != null)
+            DontDestroyOnLoad(PlayerData.gameObject);
     }
 
     private async UniTask CreateObjects()
@@ -89,7 +101,7 @@ public class GameInitiator : MonoBehaviour
         {
             _gameManager.OnGameReset += OnGameManagerReset;
             Debug.Log("GameInitiator: Subscribed to GameManager.OnGameReset event");
-            
+
             // Auto-start the game after restart
             _gameManager.AutoStartGame();
         }

@@ -87,13 +87,13 @@ public class GameManager : MonoBehaviour
 
     [SerializeField]
     private AudioPlayer audioPlayer;
-    
+
     [SerializeField]
     private HealthBar healthBarPrefab;
-    
+
     [SerializeField]
     private GameObject staminaBarPrefab;
-    
+
     [Header("UI Canvas")]
     [SerializeField]
     [Tooltip("The Canvas that will contain the Health Bar UI")]
@@ -102,36 +102,36 @@ public class GameManager : MonoBehaviour
     [Header("Enemy Spawning")]
     [SerializeField]
     private GameObject gatorPrefab;
-    
+
     [SerializeField]
     private GameObject birdPrefab;
-    
+
     [SerializeField]
     [Tooltip("Time interval between enemy spawns after the first enemy")]
     private float enemySpawnInterval = 30f;
-    
+
     [SerializeField]
     [Tooltip("Delay before the first enemy spawns")]
     private float firstEnemySpawnDelay = 15f;
-    
+
     [SerializeField]
     [Tooltip("Minimum free time after an enemy is destroyed before spawning next enemy")]
     private float minFreeTimeBetweenEnemies = 5f;
-    
+
     [Range(0f, 1f)]
     [SerializeField]
     private float gatorSpawnChance = 0.5f;
-    
+
     [SerializeField]
     private Vector3 gatorSpawnOffset = new Vector3(-15f, 3f, 0f);
-    
+
     [SerializeField]
     private Vector3 birdSpawnOffset = new Vector3(15f, 5f, 0f);
 
     [Header("Health Regeneration")]
     [SerializeField]
     private float healDistanceInterval = 250f;
-    
+
     [SerializeField]
     private float healAmount = 0.25f;
 
@@ -151,12 +151,12 @@ public class GameManager : MonoBehaviour
     private PlayerStamina playerStamina;
 
     private float initialCatMaxSpeed;
-    
+
     private float enemySpawnTimer = 0f;
     private bool firstEnemySpawned = false;
     private GameObject currentEnemy;
     private float lastEnemyDestroyedTime = 0f;
-    
+
     private float lastHealDistance = 0f;
     private float lastEnemySpawnTime = 0f;
 
@@ -193,7 +193,7 @@ public class GameManager : MonoBehaviour
 
         // Setup player health
         SetupPlayerHealth();
-        
+
         // Setup player stamina
         SetupPlayerStamina();
 
@@ -213,20 +213,22 @@ public class GameManager : MonoBehaviour
         {
             settingScreen = Instantiate(settingScreenPrefab);
         }
-        
+
         // Instantiate health bar and parent it to Canvas
         if (healthBarPrefab != null)
         {
             healthBar = Instantiate(healthBarPrefab);
-            
+
             // Use assigned Canvas or find one in scene
             Canvas canvas = uiCanvas;
             if (canvas == null)
             {
                 canvas = FindObjectOfType<Canvas>();
-                Debug.LogWarning("GameManager: UI Canvas not assigned! Using FindObjectOfType as fallback.");
+                Debug.LogWarning(
+                    "GameManager: UI Canvas not assigned! Using FindObjectOfType as fallback."
+                );
             }
-            
+
             if (canvas != null)
             {
                 healthBar.transform.SetParent(canvas.transform, false);
@@ -234,36 +236,38 @@ public class GameManager : MonoBehaviour
             }
             else
             {
-                Debug.LogError("GameManager: No Canvas found in scene! HealthBar will not be visible.");
+                Debug.LogError(
+                    "GameManager: No Canvas found in scene! HealthBar will not be visible."
+                );
             }
-            
+
             // Initialize health bar with player's max health
             if (playerHealth != null)
             {
                 healthBar.Initialize(playerHealth.GetMaxHealth());
             }
         }
-        
+
         // Instantiate stamina bar and parent it to Canvas
         if (staminaBarPrefab != null)
         {
             staminaBarObject = Instantiate(staminaBarPrefab);
             staminaBar = staminaBarObject.GetComponent<StaminaBar>();
             staminaBarSlider = staminaBarObject.GetComponent<StaminaBarSlider>();
-            
+
             // Use assigned Canvas or find one in scene
             Canvas canvas = uiCanvas;
             if (canvas == null)
             {
                 canvas = FindObjectOfType<Canvas>();
             }
-            
+
             if (canvas != null && staminaBarObject != null)
             {
                 staminaBarObject.transform.SetParent(canvas.transform, false);
                 Debug.Log("GameManager: StaminaBar parented to Canvas: " + canvas.name);
             }
-            
+
             // Initialize stamina bar with player's max stamina
             if (playerStamina != null)
             {
@@ -271,7 +275,7 @@ public class GameManager : MonoBehaviour
                 {
                     staminaBar.Initialize(playerStamina.GetMaxStamina());
                 }
-                
+
                 if (staminaBarSlider != null)
                 {
                     staminaBarSlider.Initialize(playerStamina.GetMaxStamina());
@@ -280,8 +284,8 @@ public class GameManager : MonoBehaviour
         }
 
         // Initialize screens with callbacks
-        startingScreen.Initialize(OnStartButtonClicked);
-        gamerunScreen.Initialize(OnPauseButtonClicked);
+        startingScreen.Initialize(OnStartButtonClicked, ShowSettings);
+        gamerunScreen.Initialize(OnPauseButtonClicked, runProgressTracker, coinCollector);
         pauseScreen.Initialize(OnHomeButtonClicked, OnRestartButtonClicked, OnResumeButtonClicked);
         gameResultScreen.Initialize(OnRestartButtonClicked, OnHomeButtonClicked);
         if (settingScreen != null)
@@ -301,7 +305,11 @@ public class GameManager : MonoBehaviour
         gamerunScreen.Hide();
         pauseScreen.Hide();
         gameResultScreen.Hide();
-        settingScreen?.Hide();
+        if (settingScreen != null)
+        {
+            settingScreen.Hide();
+        }
+
         if (healthBar != null)
         {
             healthBar.gameObject.SetActive(false);
@@ -343,18 +351,18 @@ public class GameManager : MonoBehaviour
             loseConditionObserver.OnObstacleHit -= OnLoseCondition;
             loseConditionObserver.OnHoleFall -= OnHoleFall;
         }
-        
+
         if (playerHealth != null)
         {
             playerHealth.OnHealthChanged -= OnPlayerHealthChanged;
             playerHealth.OnPlayerDied -= OnPlayerDied;
         }
-        
+
         if (playerStamina != null)
         {
             playerStamina.OnStaminaChanged -= OnPlayerStaminaChanged;
         }
-        
+
         if (currentEnemy != null)
         {
             Destroy(currentEnemy);
@@ -374,10 +382,10 @@ public class GameManager : MonoBehaviour
         {
             playerHealth = catPlayer.gameObject.AddComponent<PlayerHealth>();
         }
-        
+
         playerHealth.OnHealthChanged += OnPlayerHealthChanged;
         playerHealth.OnPlayerDied += OnPlayerDied;
-        
+
         Debug.Log("GameManager: Player health system initialized");
     }
 
@@ -387,7 +395,7 @@ public class GameManager : MonoBehaviour
         {
             healthBar.UpdateHealth(currentHealth, maxHealth);
         }
-        
+
         Debug.Log("GameManager: Player health changed to " + currentHealth + "/" + maxHealth);
     }
 
@@ -415,29 +423,40 @@ public class GameManager : MonoBehaviour
         {
             Debug.Log("GameManager: Found existing PlayerStamina component");
         }
-        
+
         playerStamina.OnStaminaChanged += OnPlayerStaminaChanged;
-        
-        Debug.Log("GameManager: Player stamina system initialized - Max=" + playerStamina.GetMaxStamina() + 
-                  " Current=" + playerStamina.GetCurrentStamina());
+
+        Debug.Log(
+            "GameManager: Player stamina system initialized - Max="
+                + playerStamina.GetMaxStamina()
+                + " Current="
+                + playerStamina.GetCurrentStamina()
+        );
     }
 
     void OnPlayerStaminaChanged(float currentStamina, float maxStamina)
     {
-        Debug.Log("GameManager: OnPlayerStaminaChanged called - " + currentStamina + "/" + maxStamina + 
-                  " | staminaBar=" + (staminaBar != null) + 
-                  " | staminaBarSlider=" + (staminaBarSlider != null));
-        
+        Debug.Log(
+            "GameManager: OnPlayerStaminaChanged called - "
+                + currentStamina
+                + "/"
+                + maxStamina
+                + " | staminaBar="
+                + (staminaBar != null)
+                + " | staminaBarSlider="
+                + (staminaBarSlider != null)
+        );
+
         if (staminaBar != null && staminaBarSlider == null)
         {
             staminaBar.UpdateStamina(currentStamina, maxStamina);
         }
-        
+
         if (staminaBarSlider != null)
         {
             staminaBarSlider.UpdateStamina(currentStamina, maxStamina);
         }
-        
+
         Debug.Log("GameManager: Player stamina changed to " + currentStamina + "/" + maxStamina);
     }
 
@@ -450,11 +469,11 @@ public class GameManager : MonoBehaviour
     void UpdateEnemySpawning()
     {
         enemySpawnTimer += Time.deltaTime;
-        
+
         // Check if enough free time has passed since last enemy was destroyed
         float timeSinceLastEnemy = Time.time - lastEnemyDestroyedTime;
         bool hasMinFreeTimePassed = timeSinceLastEnemy >= minFreeTimeBetweenEnemies;
-        
+
         // First enemy spawn (only if free time condition is met)
         if (!firstEnemySpawned && enemySpawnTimer >= firstEnemySpawnDelay && hasMinFreeTimePassed)
         {
@@ -478,10 +497,10 @@ public class GameManager : MonoBehaviour
             Destroy(currentEnemy);
             lastEnemyDestroyedTime = Time.time;
         }
-        
+
         // Random chance to spawn Gator or Bird
         float randomValue = Random.value;
-        
+
         if (randomValue < gatorSpawnChance)
         {
             SpawnGator();
@@ -490,8 +509,10 @@ public class GameManager : MonoBehaviour
         {
             SpawnBird();
         }
-        
-        Debug.Log($"GameManager: Enemy spawned. Next spawn allowed after {minFreeTimeBetweenEnemies}s free time.");
+
+        Debug.Log(
+            $"GameManager: Enemy spawned. Next spawn allowed after {minFreeTimeBetweenEnemies}s free time."
+        );
     }
 
     void SpawnGator()
@@ -501,10 +522,10 @@ public class GameManager : MonoBehaviour
             Debug.LogWarning("GameManager: Gator prefab not assigned!");
             return;
         }
-        
+
         Vector3 spawnPosition = catPlayer.transform.position + gatorSpawnOffset;
         currentEnemy = Instantiate(gatorPrefab, spawnPosition, Quaternion.identity);
-        
+
         Debug.Log("GameManager: Spawned Gator enemy at " + spawnPosition);
         lastEnemySpawnTime = Time.time;
     }
@@ -516,10 +537,10 @@ public class GameManager : MonoBehaviour
             Debug.LogWarning("GameManager: Bird prefab not assigned!");
             return;
         }
-        
+
         Vector3 spawnPosition = catPlayer.transform.position + birdSpawnOffset;
         currentEnemy = Instantiate(birdPrefab, spawnPosition, Quaternion.identity);
-        
+
         Debug.Log("GameManager: Spawned Bird enemy at " + spawnPosition);
         lastEnemySpawnTime = Time.time;
     }
@@ -529,7 +550,7 @@ public class GameManager : MonoBehaviour
         enemySpawnTimer = 0f;
         firstEnemySpawned = false;
         lastEnemyDestroyedTime = 0f;
-        
+
         // Destroy current enemy if exists
         if (currentEnemy != null)
         {
@@ -548,17 +569,23 @@ public class GameManager : MonoBehaviour
     {
         if (runProgressTracker == null)
             return;
-            
+
         float currentDist = runProgressTracker.CurrentDistance;
-        
+
         if (currentDist >= lastHealDistance + healDistanceInterval)
         {
             if (playerHealth != null)
             {
                 playerHealth.Heal(healAmount);
-                Debug.Log("GameManager: Healing player " + healAmount + " HP at " + Mathf.FloorToInt(currentDist) + "m distance");
+                Debug.Log(
+                    "GameManager: Healing player "
+                        + healAmount
+                        + " HP at "
+                        + Mathf.FloorToInt(currentDist)
+                        + "m distance"
+                );
             }
-            
+
             lastHealDistance += healDistanceInterval;
         }
     }
@@ -602,13 +629,13 @@ public class GameManager : MonoBehaviour
 
         // Reset enemy spawning
         ResetEnemySpawning();
-        
+
         // Reset player health
         if (playerHealth != null)
         {
             playerHealth.ResetHealth();
         }
-        
+
         // Reset player stamina
         if (playerStamina != null)
         {
@@ -763,17 +790,17 @@ public class GameManager : MonoBehaviour
         int finalDistance = runProgressTracker != null ? runProgressTracker.CurrentDistance : 0;
         gameResultScreen.SetResults(finalScore, finalDistance);
         gameResultScreen.Show();
-        
+
         if (healthBar != null)
         {
             healthBar.gameObject.SetActive(false);
         }
-        
+
         if (staminaBarObject != null)
         {
             staminaBarObject.SetActive(false);
         }
-        
+
         if (audioPlayer != null)
         {
             audioPlayer.PlayMenuMusic();
@@ -828,13 +855,13 @@ public class GameManager : MonoBehaviour
 
         // Reset enemy spawning
         ResetEnemySpawning();
-        
+
         // Reset player health
         if (playerHealth != null)
         {
             playerHealth.ResetHealth();
         }
-        
+
         // Reset player stamina
         if (playerStamina != null)
         {

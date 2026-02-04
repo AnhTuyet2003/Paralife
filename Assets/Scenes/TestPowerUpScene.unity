@@ -169,6 +169,7 @@ MonoBehaviour:
   birdPrefab: {fileID: 3197322853826163886, guid: 1b0581a2fa8393746a49a8623173bf64, type: 3}
   enemySpawnInterval: 30
   firstEnemySpawnDelay: 15
+  minFreeTimeBetweenEnemies: 5
   gatorSpawnChance: 0.5
   gatorSpawnOffset: {x: -15, y: 3, z: 0}
   birdSpawnOffset: {x: 15, y: 5, z: 0}
@@ -5262,7 +5263,7 @@ Transform:
   m_GameObject: {fileID: 290400404}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 9.955555, y: -11.199999, z: -10}
+  m_LocalPosition: {x: 8.210995, y: -11.199999, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -6162,7 +6163,7 @@ Transform:
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 9.955555, y: -11.199999, z: -10}
+  m_LocalPosition: {x: 8.210995, y: -11.199999, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
