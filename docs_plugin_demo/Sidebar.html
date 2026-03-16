@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <style>
+    body {
+      font-family: 'Roboto', Arial, sans-serif;
+      padding: 16px;
+      margin: 0;
+      background-color: #f5f5f5;
+    }
+    
+    h2 {
+      color: #2D60FF;
+      margin-top: 0;
+      font-size: 20px;
+    }
+    
+    .search-box {
+      margin-bottom: 16px;
+    }
+    
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+    
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #2D60FF;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-top: 8px;
+    }
+    
+    button:hover {
+      background-color: #1a4acc;
+    }
+    
+    button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+    
+    .results {
+      margin-top: 20px;
+    }
+    
+    .document-item {
+      background: white;
+      padding: 12px;
+      margin-bottom: 12px;
+      border-radius: 8px;
+      border: 1px solid #e0e0e0;
+      cursor: pointer;
+      transition: box-shadow 0.2s;
+    }
+    
+    .document-item:hover {
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .document-title {
+      font-weight: 600;
+      font-size: 14px;
+      color: #333;
+      margin-bottom: 4px;
+    }
+    
+    .document-authors {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 4px;
+    }
+    
+    .document-year {
+      font-size: 11px;
+      color: #999;
+    }
+    
+    .document-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    
+    .action-btn {
+      flex: 1;
+      padding: 6px 12px;
+      font-size: 12px;
+      background-color: #f0f0f0;
+      color: #333;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    
+    .action-btn:hover {
+      background-color: #e0e0e0;
+    }
+    
+    .action-btn.primary {
+      background-color: #2D60FF;
+      color: white;
+    }
+    
+    .action-btn.primary:hover {
+      background-color: #1a4acc;
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #666;
+    }
+    
+    .error {
+      background-color: #ffebee;
+      color: #c62828;
+      padding: 12px;
+      border-radius: 4px;
+      margin-top: 12px;
+      font-size: 13px;
+    }
+    
+    .empty {
+      text-align: center;
+      padding: 40px 20px;
+      color: #999;
+    }
+    
+    .citation-style-selector {
+      margin: 8px 0;
+    }
+    
+    select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+    
+    .highlight-item {
+      background: #fff9e6;
+      padding: 10px;
+      margin-bottom: 8px;
+      border-left: 3px solid #ffd700;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+    
+    .highlight-note {
+      margin-top: 6px;
+      font-style: italic;
+      color: #666;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <h2>🔍 Refmind Citation Tool</h2>
+  
+  <div class="search-box">
+    <input type="text" id="searchQuery" placeholder="Search your library..." />
+    <button onclick="performSearch()">Search</button>
+  </div>
+  
+  <div id="results" class="results"></div>
+  
+  <script>
+    // Search documents
+    function performSearch() {
+      const query = document.getElementById('searchQuery').value;
+      
+      if (!query.trim()) {
+        alert('Please enter a search term');
+        return;
+      }
+      
+      showLoading();
+      
+      google.script.run
+        .withSuccessHandler(handleSearchResults)
+        .withFailureHandler(handleError)
+        .searchDocuments(query);
+    }
+    
+    // Handle search results
+    function handleSearchResults(result) {
+      const resultsDiv = document.getElementById('results');
+      
+      if (!result.success) {
+        resultsDiv.innerHTML = `<div class="error">${result.error}</div>`;
+        return;
+      }
+      
+      if (!result.documents || result.documents.length === 0) {
+        resultsDiv.innerHTML = '<div class="empty">No documents found</div>';
+        return;
+      }
+      
+      let html = '';
+      result.documents.forEach(doc => {
+        const authors = Array.isArray(doc.authors) ? doc.authors.join(', ') : 'Unknown authors';
+        const year = doc.year || 'n.d.';
+        
+        html += `
+          <div class="document-item">
+            <div class="document-title">${escapeHtml(doc.title)}</div>
+            <div class="document-authors">${escapeHtml(authors)}</div>
+            <div class="document-year">${year}</div>
+            <div class="document-actions">
+              <button class="action-btn primary" onclick="showCitationOptions('${doc.id}', '${escapeHtml(doc.title)}')">
+                📝 Cite
+              </button>
+              <button class="action-btn" onclick="showHighlights('${doc.id}')">
+                ✨ Highlights
+              </button>
+            </div>
+          </div>
+        `;
+      });
+      
+      resultsDiv.innerHTML = html;
+    }
+    
+    // Show citation style selector
+    function showCitationOptions(itemId, title) {
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = `
+        <div style="background:white; padding:16px; border-radius:8px;">
+          <h3 style="margin-top:0;">Generate Citation</h3>
+          <p style="font-size:13px; color:#666;">${title}</p>
+          
+          <div class="citation-style-selector">
+            <label>Citation Style:</label>
+            <select id="citationStyle">
+              <option value="apa">APA 7th Edition</option>
+              <option value="apa6">APA 6th Edition</option>
+              <option value="ieee">IEEE</option>
+              <option value="harvard">Harvard</option>
+              <option value="mla">MLA</option>
+              <option value="chicago">Chicago (Author-Date)</option>
+              <option value="vancouver">Vancouver</option>
+              <option value="nature">Nature</option>
+              <option value="acs">ACS (American Chemical Society)</option>
+              <option value="bibtex">BibTeX</option>
+            </select>
+          </div>
+          
+          <button onclick="insertCitation('${itemId}')">Insert Citation</button>
+          <button onclick="performSearch()" style="background:#666; margin-top:4px;">← Back to Results</button>
+        </div>
+      `;
+    }
+    
+    // Insert citation
+    function insertCitation(itemId) {
+      const style = document.getElementById('citationStyle').value;
+      
+      showLoading();
+      
+      google.script.run
+        .withSuccessHandler(function(result) {
+          if (result.success) {
+            // Insert citation into document
+            google.script.run
+              .withSuccessHandler(function() {
+                alert('✅ Citation inserted successfully!');
+                performSearch();
+              })
+              .withFailureHandler(handleError)
+              .insertTextAtCursor(result.citation);
+          } else {
+            alert('❌ ' + result.error);
+          }
+        })
+        .withFailureHandler(handleError)
+        .generateCitation(itemId, style);
+    }
+    
+    // Show highlights
+    function showHighlights(itemId) {
+      showLoading();
+      
+      google.script.run
+        .withSuccessHandler(function(result) {
+          if (!result.success) {
+            alert('❌ ' + result.error);
+            return;
+          }
+          
+          const resultsDiv = document.getElementById('results');
+          let html = `
+            <div style="background:white; padding:16px; border-radius:8px;">
+              <h3 style="margin-top:0;">Highlights & Notes</h3>
+              <p style="font-size:13px; color:#666;">${escapeHtml(result.document.title)}</p>
+          `;
+          
+          if (result.highlights && result.highlights.length > 0) {
+            result.highlights.forEach(h => {
+              html += `
+                <div class="highlight-item">
+                  <div>${escapeHtml(h.text)}</div>
+                  ${h.note ? `<div class="highlight-note">💭 ${escapeHtml(h.note)}</div>` : ''}
+                  <div style="font-size:11px; color:#999; margin-top:6px;">Page ${h.page_number}</div>
+                  <button class="action-btn primary" style="margin-top:8px;" onclick="insertHighlight('${escapeHtml(h.text)}')">
+                    Insert
+                  </button>
+                </div>
+              `;
+            });
+          } else {
+            html += '<div class="empty">No highlights found</div>';
+          }
+          
+          html += '<button onclick="performSearch()" style="margin-top:12px; background:#666;">← Back to Results</button></div>';
+          resultsDiv.innerHTML = html;
+        })
+        .withFailureHandler(handleError)
+        .getHighlights(itemId);
+    }
+    
+    // Insert highlight text
+    function insertHighlight(text) {
+      google.script.run
+        .withSuccessHandler(function() {
+          alert('✅ Highlight inserted!');
+        })
+        .withFailureHandler(handleError)
+        .insertTextAtCursor(text);
+    }
+    
+    // Utility functions
+    function showLoading() {
+      document.getElementById('results').innerHTML = '<div class="loading">⏳ Loading...</div>';
+    }
+    
+    function handleError(error) {
+      alert('❌ Error: ' + error);
+      document.getElementById('results').innerHTML = '';
+    }
+    
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+    
+    // Press Enter to search
+    document.getElementById('searchQuery').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        performSearch();
+      }
+    });
+  </script>
+</body>
+</html>

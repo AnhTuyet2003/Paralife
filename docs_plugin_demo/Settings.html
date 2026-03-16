@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <style>
+    body {
+      font-family: 'Roboto', Arial, sans-serif;
+      padding: 20px;
+      margin: 0;
+    }
+    
+    h3 {
+      color: #2D60FF;
+      margin-top: 0;
+    }
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      font-size: 14px;
+    }
+    
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+      box-sizing: border-box;
+      margin-bottom: 16px;
+    }
+    
+    button {
+      padding: 10px 20px;
+      background-color: #2D60FF;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      margin-right: 8px;
+    }
+    
+    button:hover {
+      background-color: #1a4acc;
+    }
+    
+    .help-text {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+    
+    .success {
+      background-color: #e8f5e9;
+      color: #2e7d32;
+      padding: 12px;
+      border-radius: 4px;
+      margin-top: 12px;
+      font-size: 13px;
+    }
+    
+    .error {
+      background-color: #ffebee;
+      color: #c62828;
+      padding: 12px;
+      border-radius: 4px;
+      margin-top: 12px;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+  <h3>Refmind Settings</h3>
+  
+  <div class="help-text">
+    To use this add-on, you need to provide your Refmind authentication token. 
+    You can get this from your Refmind app or web dashboard.
+  </div>
+  
+  <label for="authToken">Authentication Token:</label>
+  <input type="text" id="authToken" placeholder="Enter your token here..." />
+  
+  <div class="help-text">
+    <strong>How to get your token:</strong><br>
+    1. Open Refmind mobile app<br>
+    2. Go to Settings → API Keys<br>
+    3. Copy your authentication token<br>
+    4. Paste it above
+  </div>
+  
+  <button onclick="saveToken()">Save Token</button>
+  <button onclick="google.script.host.close()" style="background:#666;">Cancel</button>
+  
+  <div id="message"></div>
+  
+  <script>
+    // Load existing token on open
+    window.onload = function() {
+      google.script.run
+        .withSuccessHandler(function(token) {
+          if (token) {
+            document.getElementById('authToken').value = token;
+          }
+        })
+        .getAuthToken();
+    };
+    
+    // Save token
+    function saveToken() {
+      const token = document.getElementById('authToken').value.trim();
+      
+      if (!token) {
+        showMessage('Please enter a token', 'error');
+        return;
+      }
+      
+      google.script.run
+        .withSuccessHandler(function(result) {
+          if (result.success) {
+            showMessage('✅ ' + result.message, 'success');
+            setTimeout(function() {
+              google.script.host.close();
+            }, 1500);
+          } else {
+            showMessage('❌ Failed to save token', 'error');
+          }
+        })
+        .withFailureHandler(function(error) {
+          showMessage('❌ Error: ' + error, 'error');
+        })
+        .saveAuthToken(token);
+    }
+    
+    // Show message
+    function showMessage(text, type) {
+      const messageDiv = document.getElementById('message');
+      messageDiv.className = type;
+      messageDiv.textContent = text;
+    }
+  </script>
+</body>
+</html>

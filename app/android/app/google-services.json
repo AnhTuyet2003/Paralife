@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "164135358030",
+    "project_id": "refmind-d7a75",
+    "storage_bucket": "refmind-d7a75.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:164135358030:android:f372bbdceb69365a73fd1f",
+        "android_client_info": {
+          "package_name": "com.refmind.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "164135358030-7ts5fibstvsc9denmf3klnad35ej3f9o.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.refmind.app",
+            "certificate_hash": "3ed9072662d2607e043a5119bbb6597c801d2f0f"
+          }
+        },
+        {
+          "client_id": "164135358030-3nvrccjnsbb6v2g4s9iv1va425duud7j.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCGqDIgTVO-7rg5wCd9l_PgHYpIMeoQSrA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "164135358030-3nvrccjnsbb6v2g4s9iv1va425duud7j.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

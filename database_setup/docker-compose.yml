@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  postgres-db:
+    image: pgvector/pgvector:pg16 # Tự động cài sẵn PostgreSQL bản 16 + extension pgvector
+    container_name: refmind_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: adminpassword123
+      POSTGRES_DB: refmind_db
+    ports:
+      - "5432:5432" # Mở port để Node.js và Python kết nối
+    volumes:
+      - pgdata:/var/lib/postgresql/data # Lưu dữ liệu vào ổ cứng để tắt máy không bị mất
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql # Tự động chạy file tạo bảng ở lần đầu tiên
+
+volumes:
+  pgdata:

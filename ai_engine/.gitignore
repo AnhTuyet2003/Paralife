@@ -1,0 +1,33 @@
+# .gitignore
+__pycache__/
+env/
+venv/
+*.pyc
+config/serviceAccountKey.json
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+env/
+
+# Logs
+*.log
+
+# Model files
+*.pt
+*.bin
+*.onnx
+
+# Data
+*.csv
+*.zip
+*.tar
+*.gz
+
+# OS
+.DS_Store
+Thumbs.db
